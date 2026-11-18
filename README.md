@@ -4,29 +4,31 @@ Fundação do backend em Django e Django REST Framework com PostgreSQL. Esta eta
 
 ## Desenvolvimento local
 
-Pré-requisitos: Docker com Compose e uma porta local disponível (8000 por padrão). Na raiz do repositório:
+Pré-requisitos: Docker com Compose, Make e uma porta local disponível (8000 por padrão). Na raiz do repositório:
 
 ```bash
-cp infra/.env.example infra/.env
+make env
 ```
 
 Edite `infra/.env`: substitua a chave e a senha de exemplo. Para gerar uma chave aleatória, use `python3 -c 'import secrets; print(secrets.token_urlsafe(50))'`. Os valores do arquivo são apenas para desenvolvimento. Não versione credenciais.
 
 ```bash
-docker compose --env-file infra/.env -f infra/compose.yaml up -d --build
-docker compose --env-file infra/.env -f infra/compose.yaml exec backend python manage.py migrate
-docker compose --env-file infra/.env -f infra/compose.yaml exec backend python manage.py check --database default
-docker compose --env-file infra/.env -f infra/compose.yaml exec backend python manage.py test tests
-docker compose --env-file infra/.env -f infra/compose.yaml exec backend python manage.py makemigrations --check --dry-run
+make up
+make migrate
+make backend-check
+make backend-test
+make check-migrations
 ```
 
 O serviço de desenvolvimento escuta em `http://127.0.0.1:8000/` por padrão; altere `BACKEND_PORT` se necessário. Ainda não há rotas de negócio, portanto uma resposta 404 na raiz é esperada. O Compose espera o PostgreSQL estar pronto. Migrações são executadas explicitamente, não automaticamente na inicialização.
 
 ```bash
-docker compose --env-file infra/.env -f infra/compose.yaml ps
-docker compose --env-file infra/.env -f infra/compose.yaml logs backend
-docker compose --env-file infra/.env -f infra/compose.yaml down
+make ps
+make logs
+make down
 ```
+
+Use `make help` para listar todos os comandos. Os comandos Django usam os containers em execução. Como o código é copiado para a imagem, execute `make up` novamente após alterações no backend. Para usar outro arquivo de ambiente, informe `ENV_FILE`, por exemplo: `make ENV_FILE=/caminho/ambiente.env up`.
 
 O volume nomeado do PostgreSQL é preservado pelo `down` e pela recriação dos containers. Remover o volume apaga os dados. Se as credenciais do PostgreSQL forem alteradas após a inicialização do volume, a configuração existente do banco deve ser atualizada separadamente.
 
