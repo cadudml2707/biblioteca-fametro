@@ -4,7 +4,7 @@
 
 **Uma biblioteca contemporânea, clara e confiável.** A interface combina o azul institucional com superfícies luminosas, tipografia expressiva e detalhes discretos que remetem a livros e organização do conhecimento. A prioridade é facilitar o trabalho diário da equipe e a descoberta do acervo pelo aluno.
 
-A proposta parte da observação do portal FAMETRO: marca azul e vermelha sobre branco, navegação lateral azul, atalhos em turquesa e áreas de consulta com filtros. O mural usa peças promocionais de cores intensas; para a biblioteca, a identidade mantém a ligação institucional e usa composição mais tranquila, com hierarquia e espaço para leitura. Os hexadecimais abaixo são **propostos**, não uma extração oficial da marca. Usar o arquivo oficial da FAMETRO, sem redesenhar ou alterar suas proporções, quando disponibilizado.
+A base visual vem do logotipo exibido no [Portal da FAMETRO](https://sistemas.portaledu.com.br/). As duas cores predominantes do arquivo são azul `#0D62AD` e vermelho `#ED3237`. As demais cores são complementos definidos para a interface da biblioteca. Use a marca em fundo branco e mantenha suas proporções e cores originais.
 
 ## Paleta proposta
 
@@ -12,15 +12,15 @@ A proposta parte da observação do portal FAMETRO: marca azul e vermelha sobre 
 
 | Token | Uso | Hex |
 |---|---|---|
-| `brand-primary` | Azul institucional, ações principais | `#07549B` |
+| `brand-primary` | Azul institucional, ações principais | `#0D62AD` |
 | `brand-primary-dark` | Sidebar e hover do botão principal | `#07386C` |
 | `brand-primary-light` | Seleção e fundos suaves | `#E8F1FA` |
 | `brand-accent` | Turquesa de destaque e elementos gráficos | `#087E8B` |
 | `brand-accent-dark` | Texto de destaque e hover | `#06636D` |
 | `brand-accent-light` | Fundos de destaque | `#E0F4F3` |
-| `brand-red` | Referência pontual ao vermelho da marca | `#C82736` |
+| `brand-red` | Vermelho da marca, indicador ativo e detalhes da ilustração | `#ED3237` |
 
-O azul domina a identidade. O turquesa orienta detalhes e descobertas; o vermelho institucional aparece pontualmente e não é o único indicador de erro. Não usar turquesa claro ou vermelho em grandes áreas decorativas.
+O azul estrutura a interface e identifica as ações principais. O vermelho aparece na faixa do login, no indicador de navegação e na ilustração. O turquesa complementa a identidade e o tom `danger` sinaliza erros.
 
 ### Neutros
 
@@ -41,15 +41,15 @@ O azul domina a identidade. O turquesa orienta detalhes e descobertas; o vermelh
 | `success` | Disponível, concluído | `#176B45` | `#E4F4EB` |
 | `warning` | Atenção, prazo próximo | `#805000` | `#FFF2D6` |
 | `danger` | Erro, atraso, ação destrutiva | `#B42332` | `#FDEBED` |
-| `info` | Informações e situação em andamento | `#07549B` | `#E8F1FA` |
+| `info` | Informações e situação em andamento | `#0D62AD` | `#E8F1FA` |
 
 Sempre apresentar status com texto e, quando útil, ícone; cor isolada não comunica significado. Texto semântico usa a cor escura sobre o fundo suave, nunca branco sobre amarelo.
 
 ## Hierarquia visual
 
 1. **Estrutura institucional:** sidebar `#07386C`, marca oficial sobre fundo apropriado e indicadores de navegação claros.
-2. **Ação principal:** fundo `#07549B`, texto branco e hover `#07386C`. Uma ação principal por região ou etapa.
-3. **Destaque editorial:** turquesa `#087E8B` em detalhes, links e indicadores, com uso moderado.
+2. **Ação principal:** fundo `#0D62AD`, texto branco e hover `#07386C`. Uma ação principal por região ou etapa.
+3. **Destaque da marca:** vermelho `#ED3237` nas faixas, no indicador ativo e em detalhes gráficos. Use o turquesa como cor complementar.
 4. **Conteúdo:** fundo `#F5F8FC`, superfícies brancas, divisores discretos e títulos `#142C42`.
 
 ### Tipografia
@@ -71,9 +71,9 @@ Sempre apresentar status com texto e, quando útil, ícone; cor isolada não com
 
 ### Web de gestão
 
-- **Sidebar:** fundo `#07386C`, texto branco, item ativo `#14558F` com indicador turquesa claro `#7FE2E3`; exibir ícone e nome. Recolher em telas menores sem esconder o acesso à navegação.
+- **Sidebar:** fundo `#07386C`, texto branco, item ativo `#14558F` com indicador vermelho `#ED3237`. Exibir ícone e nome.
 - **Header:** branco, borda inferior `#D4DFEA`, título escuro, identificação do usuário e ações contextuais. Em telas internas, priorizar título, descrição curta e ação principal.
-- **Botão primário:** azul `#07549B`, texto branco, hover `#07386C`; altura mínima de 44 px. Secundário branco, texto azul e borda `#D4DFEA`; destrutivo com confirmação quando a operação exigir.
+- **Botão primário:** azul `#0D62AD`, texto branco, hover `#07386C`; altura mínima de 44 px. Secundário branco, texto azul e borda `#D4DFEA`; destrutivo com confirmação quando a operação exigir.
 - **Campos e filtros:** rótulo permanente acima do campo, ajuda e erro ao lado do contexto; foco visível em azul, sem depender de placeholder. Filtros próximos à lista e opção clara de limpar.
 - **Tabelas:** cabeçalho suave, linhas com bom espaçamento, alinhamento de datas e números, ações identificadas e paginação. Em telas estreitas, preservar acesso a todas as colunas com rolagem identificável ou apresentação adaptada.
 - **Cards:** usar para resumos, não para embrulhar cada elemento. Indicadores mostram título, número e contexto; relatórios favorecem tabelas e gráficos legíveis.
@@ -105,7 +105,7 @@ Sempre apresentar status com texto e, quando útil, ícone; cor isolada não com
 - Texto normal: contraste mínimo 4,5:1; texto grande e indicadores gráficos relevantes: 3:1. Validar cada combinação real, inclusive hover, foco e estados desabilitados.
 - Foco de teclado visível de pelo menos 2 px, ordem lógica, rótulos acessíveis, link para pular ao conteúdo e navegação completa por teclado na web.
 - Não transmitir disponibilidade ou erro apenas por cor. Mensagens de erro devem identificar o campo e orientar a correção.
-- Projetar a partir de 375 px, sem corte de conteúdo; aumentar margens e densidade gradualmente. Evitar rolagem horizontal da página.
+- No web de gestão, projetar para computadores a partir de 1024 px. No aplicativo do aluno, conferir o layout a partir de 375 px.
 - Tema claro é o escopo inicial; um tema escuro requer tokens próprios e verificação de contraste, sem inversão automática.
 
 ## Tokens CSS — shadcn/ui e Tailwind CSS v4
@@ -116,13 +116,13 @@ Os nomes semânticos seguem o modelo do shadcn/ui. `accent` representa uma super
 @import "tailwindcss";
 
 :root {
-  --brand-primary: #07549B;
+  --brand-primary: #0D62AD;
   --brand-primary-dark: #07386C;
   --brand-primary-light: #E8F1FA;
   --brand-accent: #087E8B;
   --brand-accent-dark: #06636D;
   --brand-accent-light: #E0F4F3;
-  --brand-red: #C82736;
+  --brand-red: #ED3237;
 
   --background: #F5F8FC;
   --foreground: #142C42;
@@ -130,7 +130,7 @@ Os nomes semânticos seguem o modelo do shadcn/ui. `accent` representa uma super
   --card-foreground: #142C42;
   --popover: #FFFFFF;
   --popover-foreground: #142C42;
-  --primary: #07549B;
+  --primary: #0D62AD;
   --primary-foreground: #FFFFFF;
   --secondary: #EDF3F8;
   --secondary-foreground: #142C42;
@@ -142,7 +142,7 @@ Os nomes semânticos seguem o modelo do shadcn/ui. `accent` representa uma super
   --destructive-foreground: #FFFFFF;
   --border: #D4DFEA;
   --input: #D4DFEA;
-  --ring: #07549B;
+  --ring: #0D62AD;
   --sidebar: #07386C;
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #7FE2E3;
@@ -157,7 +157,7 @@ Os nomes semânticos seguem o modelo do shadcn/ui. `accent` representa uma super
   --warning-light: #FFF2D6;
   --danger: #B42332;
   --danger-light: #FDEBED;
-  --info: #07549B;
+  --info: #0D62AD;
   --info-light: #E8F1FA;
   --radius: 0.625rem;
 }

@@ -1,10 +1,10 @@
 # Biblioteca FAMETRO
 
-Fundação do backend em Django e Django REST Framework com PostgreSQL. O backend inclui infraestrutura, auditoria e autenticação JWT; catálogo, circulação e integração TOTVS pertencem às próximas fases.
+Sistema com frontend Next.js e backend Django/DRF com PostgreSQL. O backend inclui infraestrutura, auditoria e autenticação JWT; catálogo, circulação e integração TOTVS pertencem às próximas fases.
 
 ## Desenvolvimento local
 
-Pré-requisitos: Docker com Compose, Make e uma porta local disponível (8000 por padrão). Na raiz do repositório:
+Pré-requisitos: Docker com Compose, Make e portas locais disponíveis para o frontend (3000) e o backend (8000). Na raiz do repositório:
 
 ```bash
 make env
@@ -20,7 +20,7 @@ make backend-test
 make check-migrations
 ```
 
-O serviço de desenvolvimento escuta em `http://127.0.0.1:8000/` por padrão; altere `BACKEND_PORT` se necessário. Ainda não há rotas de negócio, portanto uma resposta 404 na raiz é esperada. O Compose espera o PostgreSQL estar pronto. Migrações são executadas explicitamente, não automaticamente na inicialização.
+O frontend fica em `http://127.0.0.1:3000/` e a API em `http://127.0.0.1:8000/` por padrão; altere `FRONTEND_PORT` ou `BACKEND_PORT` se necessário. No acesso web, o Next.js se comunica com o backend pela rede interna do Compose. O Compose espera o PostgreSQL estar pronto. Migrações são executadas explicitamente, não automaticamente na inicialização.
 
 ```bash
 make ps
@@ -28,7 +28,7 @@ make logs
 make down
 ```
 
-Use `make help` para listar todos os comandos. Os comandos Django usam os containers em execução. Como o código é copiado para a imagem, execute `make up` novamente após alterações no backend. Para usar outro arquivo de ambiente, informe `ENV_FILE`, por exemplo: `make ENV_FILE=/caminho/ambiente.env up`.
+Use `make help` para listar todos os comandos. Os comandos Django usam os containers em execução. Como o código é copiado para as imagens, execute `make up` novamente após alterações no backend ou frontend. Para rodar testes de tipos do frontend localmente, execute `npm ci` e `npm run typecheck` dentro de `frontend/`. Para usar outro arquivo de ambiente, informe `ENV_FILE`, por exemplo: `make ENV_FILE=/caminho/ambiente.env up`.
 
 O volume nomeado do PostgreSQL é preservado pelo `down` e pela recriação dos containers. Remover o volume apaga os dados. Se as credenciais do PostgreSQL forem alteradas após a inicialização do volume, a configuração existente do banco deve ser atualizada separadamente.
 
@@ -58,3 +58,7 @@ curl http://127.0.0.1:8000/api/v1/me -H 'Authorization: Bearer ACCESS_TOKEN'
 ```
 
 `POST /auth/refresh` recebe `refresh` e retorna novos tokens; `POST /logout` recebe `refresh` e exige Bearer. A administração utiliza `GET/POST /usuarios` e `GET/PATCH /usuarios/{id}`. O contrato completo, as permissões e a política inicial de duração dos tokens estão em [usuários e autenticação](docs/especificacoes/usuarios-autenticacao.md). Para a limpeza periódica de tokens expirados, execute `python manage.py flushexpiredtokens` no container.
+
+## Acesso web
+
+Acesse `http://127.0.0.1:3000` com uma conta de bibliotecário ou administrador. A navegação apresenta as áreas futuras como indisponíveis. Os tokens permanecem em cookies HttpOnly. O Compose é para desenvolvimento local: `AUTH_COOKIE_SECURE=false` permite acesso por HTTP no localhost; em produção, use HTTPS e configure `AUTH_COOKIE_SECURE=true`.

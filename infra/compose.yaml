@@ -21,7 +21,7 @@ services:
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Defina DJANGO_SECRET_KEY}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?Defina DJANGO_ALLOWED_HOSTS}
+      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:?Defina DJANGO_ALLOWED_HOSTS},backend"
       POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
@@ -32,5 +32,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    environment:
+      BACKEND_API_URL: http://backend:8000
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_started
 volumes:
   postgres_data:

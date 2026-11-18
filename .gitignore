@@ -6,3 +6,6 @@ __pycache__/
 !.env.example
 
 .draun/
+frontend/node_modules/
+frontend/.next/
+frontend/*.tsbuildinfo
