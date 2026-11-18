@@ -1,6 +1,6 @@
 # Biblioteca FAMETRO
 
-Fundação do backend em Django e Django REST Framework com PostgreSQL. Esta etapa prepara a infraestrutura e a auditoria; não inclui API de negócio, autenticação JWT ou integração TOTVS.
+Fundação do backend em Django e Django REST Framework com PostgreSQL. O backend inclui infraestrutura, auditoria e autenticação JWT; catálogo, circulação e integração TOTVS pertencem às próximas fases.
 
 ## Desenvolvimento local
 
@@ -34,4 +34,27 @@ O volume nomeado do PostgreSQL é preservado pelo `down` e pela recriação dos 
 
 ## Continuidade
 
-`AUTH_USER_MODEL` aponta para `usuarios.Usuario` desde a primeira migração. O modelo mínimo herda `BaseModel` e `AbstractBaseUser`, com e-mail único, senha gerenciada pelo Django e um único `is_active`. A fase 2 deve completar nome, perfil, gerenciador de usuários, permissões, autenticação, serviços e APIs; esses fluxos ainda não estão disponíveis. Os responsáveis da auditoria são opcionais e sua atribuição nas operações será feita pelos serviços futuros. A configuração Compose é para desenvolvimento, não uma configuração de produção.
+`AUTH_USER_MODEL` aponta para `usuarios.Usuario` desde a primeira migração. A configuração Compose é destinada ao desenvolvimento. Os campos de auditoria são atribuídos pelo backend nas operações de gestão.
+
+
+## Usuários e autenticação
+
+Após reconstruir a imagem (`make up`) e aplicar as migrações (`make migrate`), crie o primeiro administrador interativamente:
+
+```bash
+docker compose --env-file infra/.env -f infra/compose.yaml exec backend python manage.py criar_admin_inicial
+```
+
+O comando solicita nome, e-mail e senha; não coloque a senha na linha de comando. Ele só funciona enquanto não houver administrador. A gestão posterior é feita pela API. Se um banco da fase 1 já contiver usuários, a migração preserva os registros, usa o e-mail como nome inicial e atribui o perfil `ALUNO` (`1`). E-mails duplicados sem distinção de maiúsculas precisam ser corrigidos antes da migração.
+
+A API usa `/api/v1`, sem barra final. Envie JSON e, nas rotas autenticadas, `Authorization: Bearer <access>`. Exemplos de chamadas:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.org","password":"SENHA","plataforma":"web"}'
+
+curl http://127.0.0.1:8000/api/v1/me -H 'Authorization: Bearer ACCESS_TOKEN'
+```
+
+`POST /auth/refresh` recebe `refresh` e retorna novos tokens; `POST /logout` recebe `refresh` e exige Bearer. A administração utiliza `GET/POST /usuarios` e `GET/PATCH /usuarios/{id}`. O contrato completo, as permissões e a política inicial de duração dos tokens estão em [usuários e autenticação](docs/especificacoes/usuarios-autenticacao.md). Para a limpeza periódica de tokens expirados, execute `python manage.py flushexpiredtokens` no container.

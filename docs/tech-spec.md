@@ -13,7 +13,7 @@ erDiagram
         varchar nome
         varchar email UK
         varchar password
-        varchar perfil
+        integer perfil
         boolean is_active
         timestamp created_at
         integer created_by FK "nullable"
@@ -120,6 +120,8 @@ erDiagram
 - As datas utilizam o suporte de fuso horário do Django, com apresentação em `America/Manaus`. Os nomes distintos de auditoria para cada model são definidos na classe abstrata para evitar colisões de relacionamentos.
 
 **Access profiles**
+
+O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário) e `3` (administrador).
 
 - `ALUNO` utiliza o aplicativo mobile para consultar o catálogo, solicitar reserva e acompanhar suas próprias reservas.
 - `BIBLIOTECARIO` utiliza o web para gerenciar obras, exemplares, reservas, retiradas, devoluções e relatórios.

@@ -50,7 +50,7 @@ class BaseModelTests(TransactionTestCase):
         self.assertIsInstance(self.objeto_model._meta.pk, models.AutoField)
 
     def test_audit_fields_and_soft_deactivation(self):
-        actor = get_user_model().objects.create(email="responsavel@example.org")
+        actor = get_user_model().objects.create(email="responsavel@example.org", nome="Responsável", perfil=1)
         record = self.objeto_model.objects.create()
         self.assertIsNone(record.created_by)
         self.assertIsNone(record.updated_by)
