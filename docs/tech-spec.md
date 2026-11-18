@@ -224,16 +224,27 @@ biblioteca-fametro/
 │   ├── especificacoes/                                # Regras, contratos e critérios de aceitação
 │   ├── tarefas/                                       # Tarefas derivadas das especificações
 │   └── decisoes/                                      # Decisões técnicas
-├── mobile/                                            # React Native para o aluno, desenvolvido depois do web
+├── mobile/                                            # React Native para o aluno, após backend e web
+│   ├── App.tsx                                        # Inicialização dos providers e da navegação
 │   └── src/
+│       ├── navigation/
+│       │   ├── RootNavigator.tsx                      # Login e navegação autenticada
+│       │   └── AppTabs.tsx                            # Abas Catálogo e Minhas reservas
+│       ├── contexts/
+│       │   └── AuthContext.tsx                        # Sessão e identidade retornadas pela API
 │       ├── screens/
 │       │   ├── LoginScreen.tsx
 │       │   ├── CatalogoScreen.tsx
 │       │   ├── DetalheObraScreen.tsx
 │       │   └── MinhasReservasScreen.tsx
-│       ├── components/                                # Componentes de apresentação
-│       ├── services/                                  # API e sessão
-│       └── types/                                     # Tipos das respostas da API
+│       ├── components/                                # Componentes de apresentação e estados visuais
+│       ├── services/
+│       │   ├── api.ts                                 # Fetch, headers, sessão e erros HTTP
+│       │   ├── auth.ts                                # Login, refresh, logout e identidade
+│       │   ├── obras.ts                               # Consultas ao catálogo
+│       │   ├── reservas.ts                            # Solicitação e consulta das próprias reservas
+│       │   └── storage.ts                             # Refresh token com react-native-keychain
+│       └── types/                                     # Contratos TypeScript das respostas da API
 └── README.md
 ```
 
@@ -261,11 +272,75 @@ Os formulários do web e do mobile enviam os dados para a API. O backend retorna
 
 ### Frontend
 
-- **Web** Next.js com App Router e TypeScript.
-- **Mobile** React Native e TypeScript para Android e iOS.
-- **Perfis do web** Bibliotecário e administrador.
-- **Perfil do mobile** Aluno.
-- **Responsabilidade** Coletar entradas, chamar a API e apresentar suas respostas. Regras, validações e processamento pertencem ao backend.
+- **Framework** Next.js com App Router.
+- **Linguagem** TypeScript.
+- **Perfis** Bibliotecário e administrador.
+- **Responsabilidade** Coletar entradas, chamar a API e apresentar respostas, relatórios e mensagens fornecidos pelo backend.
+
+### Mobile
+
+- **Framework** React Native.
+- **Linguagem** TypeScript.
+- **Plataformas** Android e iOS.
+- **Perfil** Aluno.
+- **Navegação proposta** React Navigation com Native Stack e Bottom Tabs.
+- **Comunicação** Fetch API do React Native, encapsulada em `mobile/src/services/api.ts`, usando REST e JSON sobre HTTPS em produção.
+- **Autenticação** JWT emitido pelo backend. Access token em memória e refresh token em armazenamento seguro por `react-native-keychain`.
+- **Estado de interface** Hooks do React e um AuthContext para a sessão e a identidade retornada pela API.
+- **Componentes e estilos** Componentes nativos do React Native e StyleSheet.
+- **Escopo de processamento** Transporte HTTP, sessão, navegação, estado visual e apresentação dos dados. Regras de reserva, limites, disponibilidade, validação de dados e permissões são executados pelo backend.
+
+React Navigation e react-native-keychain são escolhas técnicas propostas para completar a implementação do aplicativo.
+
+**Navegação e telas**
+
+A navegação começa no login. Após a autenticação autorizada pelo backend para o perfil de aluno, apresenta duas abas, Catálogo e Minhas reservas. Os detalhes da obra são abertos a partir do catálogo, usando uma pilha de navegação.
+
+| Tela | Entradas e ações | Dados apresentados |
+|---|---|---|
+| `LoginScreen` | Informar e-mail e senha e enviar a requisição de login | Mensagem e erros de autenticação retornados pelo backend |
+| `CatalogoScreen` | Enviar busca por título, autor ou ISBN e solicitar as páginas seguintes | Lista de obras e disponibilidade calculada pelo backend |
+| `DetalheObraScreen` | Consultar detalhes pelo ID e enviar solicitação de reserva | Dados da obra, disponibilidade, ação permitida e confirmação ou erro da API |
+| `MinhasReservasScreen` | Consultar as próprias reservas e solicitar atualização | Obra, situação e datas fornecidas pelo backend |
+
+A busca e a paginação são realizadas na API. A atualização ocorre ao entrar na tela, ao retornar de uma solicitação concluída ou ao atualizar manualmente. O backend informa se a ação de solicitar reserva está disponível para aquela obra e aquele aluno.
+
+**Contrato consumido pelo aplicativo**
+
+Prefixo da API `/api/v1`. O cliente HTTP recebe uma URL base por ambiente, utiliza `Authorization: Bearer <access_token>` nas operações autenticadas e interpreta respostas de sucesso e erro.
+
+| Método e rota | Uso |
+|---|---|
+| `POST /login` | Enviar e-mail e senha com contexto mobile e receber tokens e identidade autorizada |
+| `POST /auth/refresh` | Solicitar um novo access token e receber o refresh atualizado quando houver rotação |
+| `POST /logout` | Solicitar a revogação do refresh e encerrar a sessão |
+| `GET /me` | Consultar a identidade e o perfil atuais |
+| `GET /obras?search=...&page=...` | Consultar o catálogo paginado |
+| `GET /obras/{id}` | Consultar os detalhes da obra e as ações permitidas |
+| `POST /reservas` | Enviar `obra_id` para solicitar reserva própria |
+| `GET /reservas` | Receber somente as reservas do aluno autenticado |
+
+Os contratos deverão fornecer os dados necessários à apresentação.
+
+- **Login** Access token, refresh token e usuário com ID, nome e perfil. O backend autoriza a plataforma e o perfil.
+- **Catálogo** Lista paginada com ID, título, autor e quantidade disponível calculada pelo backend.
+- **Detalhes** Dados bibliográficos, quantidade disponível e indicação `pode_solicitar_reserva` definida pelo backend.
+- **Reservas** ID, obra, situação, descrição da situação e datas. As descrições e os valores exibidos seguem o retorno da API.
+- **Erros** Código, mensagem e erros por campo, quando aplicável. O aplicativo apresenta o retorno do backend.
+
+Ao solicitar uma reserva, o aplicativo envia o ID da obra. O backend identifica o aluno autenticado, valida a operação e devolve o resultado. Após o sucesso, o aplicativo consulta novamente os detalhes e as reservas para apresentar o estado confirmado no servidor.
+
+**Sessão, falhas e execução**
+
+Na abertura do aplicativo, a sessão pode ser restaurada pelo refresh token protegido. O backend valida esse token e a situação atual do usuário. Em HTTP 401 por expiração do access token, o cliente solicita a renovação e repete a requisição uma única vez após renovação bem-sucedida. Uma única renovação deve ser compartilhada entre requisições concorrentes.
+
+Se a renovação for recusada pelo backend, o aplicativo limpa a sessão e apresenta o login. Em indisponibilidade de rede ou erro do servidor durante a renovação, preserva o refresh armazenado e apresenta opção de nova tentativa. No logout, limpa a sessão local e solicita a revogação ao backend.
+
+Reservas são apresentadas como concluídas após confirmação da API. Uma falha de rede durante o envio exige consultar o estado no servidor antes de reenviar a mesma solicitação. Enquanto aguarda a resposta, a interface mostra carregamento e impede o toque repetido no mesmo envio.
+
+A configuração de ambiente contém a URL pública da API, acessível ao emulador ou dispositivo. O aplicativo utiliza HTTPS em produção. Dados e credenciais do TOTVS permanecem no backend. O funcionamento autônomo do sistema em relação ao TOTVS é preservado pela API própria.
+
+Os builds de validação devem executar em Android e iOS, com testes de login, catálogo, solicitação, acompanhamento de reservas e restauração de sessão.
 
 ### Backend
 
@@ -309,13 +384,16 @@ Os formulários do web e do mobile enviam os dados para a API. O backend retorna
 | Acesso indevido do aluno | Exposição de reservas de terceiros ou execução de gerenciamento. | Filtrar dados pela identidade autenticada e verificar o perfil e a propriedade no backend. |
 | Divergência entre web e mobile | Regras e resultados podem variar entre interfaces. | Centralizar integralmente regras, validações, cálculos e processamento no backend. |
 | Prazos e limites pendentes | O comportamento pode divergir da rotina da biblioteca. | Manter os parâmetros no banco e validá-los com a biblioteca antes de sua utilização operacional. |
+| API própria inacessível ao dispositivo | O aplicativo não consegue carregar dados ou confirmar uma reserva. | Configurar uma URL alcançável pelo emulador ou dispositivo, apresentar o erro e permitir nova consulta. |
+| Resposta perdida ao solicitar reserva | O aluno pode tentar repetir uma operação já confirmada no servidor. | Consultar novamente as reservas antes do reenvio. O backend mantém a proteção contra solicitações duplicadas. |
+| Sessão mobile indisponível | O aluno perde acesso às telas autenticadas. | Restaurar a sessão pelo refresh protegido, renovar o access pela API e apresentar novo login quando o backend recusar a autenticação. |
 
 ## Implementation Plan
 
 ### Backend Implementation Plan
 
 - [ ] **Phase 1 — Core & Infrastructure** Criar Django/DRF, PostgreSQL e Docker Compose. Configurar `AutoField` e implementar a classe abstrata `BaseModel` com `is_active`, `created_at`, `created_by`, `updated_at` e `updated_by`.
-- [ ] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT, perfis e administração local.
+- [ ] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT com login, refresh, logout e consulta da identidade, perfis e administração local. Os endpoints usados pelo mobile devem estar disponíveis nesta etapa.
 - [ ] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
 - [ ] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
 - [ ] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
@@ -325,16 +403,24 @@ Os formulários do web e do mobile enviam os dados para a API. O backend retorna
 
 ### Frontend Implementation Plan
 
-Concluir o backend e o web antes de iniciar a implementação do mobile.
-
 - [ ] **Phase 1 — Web Setup & Auth** Preparar Next.js com TypeScript, login e apresentação da navegação fornecida pelo perfil autenticado.
 - [ ] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
 - [ ] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
 - [ ] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
 - [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares.
 - [ ] **Phase 6 — Backend & Web Acceptance** Conferir os fluxos de gerenciamento e os contratos da API antes do mobile.
-- [ ] **Phase 7 — Mobile Setup & Catalog** Preparar React Native para Android e iOS, login do aluno, catálogo e detalhes das obras consumindo a API.
-- [ ] **Phase 8 — Mobile Reservations** Criar solicitação e acompanhamento das próprias reservas. Exibir as situações, mensagens e erros retornados pelo backend.
-- [ ] **Phase 9 — Final Verification** Conferir os fluxos em web, Android e iOS e a correspondência das interfaces com os resultados do backend.
+
+### Mobile Implementation Plan
+
+Iniciar após a conclusão do backend e do web e a verificação dos contratos da API usados pelo aluno.
+
+- [ ] **Phase 1 — Setup & Environment** Criar o projeto React Native com TypeScript em `mobile`, preparar a execução em Android e iOS e configurar a URL da API por ambiente. Integrar React Navigation e react-native-keychain.
+- [ ] **Phase 2 — Navigation & Presentation** Implementar RootNavigator, abas Catálogo e Minhas reservas, pilha para detalhes da obra e componentes de carregamento, erro e ausência de dados.
+- [ ] **Phase 3 — API Client & Authentication** Implementar cliente Fetch, envio do Bearer token, login, consulta de identidade, refresh, restauração de sessão e logout. Armazenar o refresh em local seguro.
+- [ ] **Phase 4 — Catalog** Implementar busca e paginação consumindo a API. Apresentar os dados e a quantidade disponível fornecidos pelo backend.
+- [ ] **Phase 5 — Book Details & Reservation Request** Consultar detalhes e ações permitidas, enviar `obra_id` e apresentar a confirmação ou os erros retornados pela API. Atualizar a interface com os dados confirmados pelo servidor.
+- [ ] **Phase 6 — Reservation Tracking** Implementar a tela das próprias reservas e a atualização ao abrir a tela ou solicitar nova consulta. Apresentar situação e datas fornecidas pelo backend.
+- [ ] **Phase 7 — Session & Network Verification** Verificar access expirado, refresh recusado, rede indisponível, toques repetidos e falha durante o envio de uma reserva. Conferir a recuperação da interface e a correspondência com o estado no servidor.
+- [ ] **Phase 8 — Android & iOS Acceptance** Executar os fluxos de login, catálogo, solicitação e acompanhamento em ambas as plataformas. Conferir a proteção das reservas de cada aluno pelo backend, os builds e a configuração da API de produção.
 
 Antes de cada funcionalidade, registrar em `docs` a especificação e os critérios de aceitação, derivar as tarefas, implementar e verificar o resultado. Atualizar a especificação quando houver mudança.
