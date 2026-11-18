@@ -36,3 +36,45 @@ body{min-width:1024px}.login-layout{min-width:1024px}.app-shell{min-width:1024px
 h1 {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
+
+.login-story-copy {
+  width: min(100%, 510px);
+  margin: auto;
+  padding: 0 0 190px;
+  text-align: center;
+}
+.login-story-kicker {
+  color: #f18b8e;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.login-story-copy h2 {
+  max-width: 480px;
+  margin: 20px auto 12px;
+  font: 700 clamp(32px, 3.4vw, 48px)/1.12 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: -.045em;
+}
+.login-story-copy p {
+  max-width: 390px;
+  margin: 0 auto;
+  color: #c7dce9;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.book-art {
+  inset: auto 0 20px;
+  height: 245px;
+  transform: none;
+}
+.art-orbit { width: 250px; height: 250px; top: 0; right: 20%; }
+.orbit-two { width: 300px; height: 300px; top: -25px; right: 15%; }
+.art-book { bottom: 0; }
+.login-main { justify-content: center; }
+.login-box { max-width: 400px; }
+.login-box .brand { margin-inline: auto; }
+.login-box h1 { text-align: center; }
+.login-form { gap: 0; margin-top: 34px; }
+.login-form .input-wrap { margin-bottom: 16px; }
+.login-form .primary-button { position: relative; justify-content: center; margin-top: 4px; }
+.login-form .primary-button svg { position: absolute; right: 17px; }

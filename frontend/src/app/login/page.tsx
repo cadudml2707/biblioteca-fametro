@@ -29,7 +29,12 @@ export default function LoginPage() {
 
   return (
     <main className="login-layout">
-      <div className="login-story" aria-hidden="true">
+      <section className="login-story" aria-label="Biblioteca FAMETRO">
+        <div className="login-story-copy">
+          <span className="login-story-kicker">BIBLIOTECA FAMETRO</span>
+          <h2>Conhecimento que transforma.</h2>
+          <p>Uma gestão mais simples para aproximar pessoas e conhecimento.</p>
+        </div>
         <div className="book-art">
           <div className="art-orbit orbit-one" />
           <div className="art-orbit orbit-two" />
@@ -37,21 +42,19 @@ export default function LoginPage() {
           <div className="art-book book-two" />
           <div className="art-book book-three" />
         </div>
-      </div>
+      </section>
       <section className="login-main" aria-labelledby="login-title">
         <div className="login-box">
           <Brand />
           <h1 id="login-title">Gestão da biblioteca</h1>
           <form onSubmit={handleSubmit} className="login-form">
-            <label htmlFor="email">E-mail</label>
             <div className="input-wrap">
               <Mail size={18} aria-hidden="true" />
-              <input id="email" type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required />
+              <input id="email" aria-label="E-mail" type="email" placeholder="seu.email@fametro.edu.br" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
-            <label htmlFor="password">Senha</label>
             <div className="input-wrap">
               <LockKeyhole size={18} aria-hidden="true" />
-              <input id="password" type={visible ? "text" : "password"} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required />
+              <input id="password" aria-label="Senha" type={visible ? "text" : "password"} placeholder="Digite sua senha" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required />
               <button type="button" className="visibility" onClick={() => setVisible(!visible)} aria-label={visible ? "Ocultar senha" : "Mostrar senha"}>
                 {visible ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
