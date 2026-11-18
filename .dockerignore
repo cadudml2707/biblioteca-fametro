@@ -1,0 +1,8 @@
+.git
+.draun
+.env
+.env.*
+**/.env
+**/.env.*
+**/__pycache__
+**/.venv
