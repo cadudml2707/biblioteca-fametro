@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Pencil, Power } from "lucide-react";
 import { FalhaApi } from "@/lib/api/cliente";
 import { requisitar, type Recurso, type Pagina, type ObraCadastro } from "@/lib/api/cadastros";
 
@@ -27,7 +28,6 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
   const [paginacao, setPaginacao] = useState<Pagina<Registro> | null>(null);
   const [busca, setBusca] = useState("");
   const [termo, setTermo] = useState("");
-  const [detalhe, setDetalhe] = useState<Registro | null>(null);
   const [editando, setEditando] = useState<Registro | null | undefined>(undefined);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [erros, setErros] = useState<Record<string, string[]>>({});
@@ -112,16 +112,6 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
   return <section className="cadastros">
     <div className="cadastros-heading"><h1>{titulos[recurso]}</h1>{!acessoNegado && <button className="primary-button" type="button" onClick={() => abrir(null)}>Novo cadastro</button>}</div>
     {mensagem && editando === undefined && <p className="cadastros-message" role="status">{mensagem}</p>}
-    {detalhe && <section className="cadastros-form" aria-labelledby="titulo-detalhes">
-      <h2 id="titulo-detalhes">Detalhes do cadastro</h2>
-      <p><strong>ID</strong> {detalhe.id}</p>
-      {campos[recurso].filter(campo => campo.nome !== "password").map(campo =>
-        <p key={campo.nome}><strong>{campo.rotulo}</strong> {campo.nome === "obra_id" ? obras.find(obra => obra.id === detalhe.obra_id)?.titulo ?? String(detalhe.obra_id) : campo.nome === "perfil" ? ({1:"Aluno",2:"Bibliotecário",3:"Administrador"} as Record<number,string>)[Number(detalhe.perfil)] : String(detalhe[campo.nome] ?? "—")}</p>
-      )}
-      <p><strong>Status</strong> <span className={`cadastros-status ${detalhe.is_active ? "cadastros-status-ativo" : "cadastros-status-inativo"}`}>{detalhe.is_active ? "Ativo" : "Inativo"}</span></p>
-      {recurso === "exemplares" && <p><strong>Situação</strong> {detalhe.situacao === 1 ? "Disponível" : "Emprestado"}</p>}
-      <div className="cadastros-actions"><button type="button" onClick={() => setDetalhe(null)}>Fechar</button></div>
-    </section>}
     {editando !== undefined && <dialog ref={dialogRef} className="cadastros-dialog" aria-labelledby="titulo-formulario" onCancel={event => { if (salvando) event.preventDefault(); }} onClose={() => setEditando(undefined)}>
       <form className="cadastros-form cadastros-dialog-form" onSubmit={salvar}>
       <h2 id="titulo-formulario">{editando ? "Editar cadastro" : "Novo cadastro"}</h2>
@@ -149,7 +139,7 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
           {recurso === "obras" ? <><td>{String(registro.titulo)}</td><td>{String(registro.autor)}</td><td>{String(registro.quantidade_disponivel)}</td></> :
             recurso === "usuarios" ? <><td>{String(registro.nome)}</td><td>{String(registro.email)}</td><td>{({1:"Aluno",2:"Bibliotecário",3:"Administrador"} as Record<number,string>)[Number(registro.perfil)]}</td></> :
             <><td>{String(registro.codigo)}</td><td>{obras.find(obra => obra.id === registro.obra_id)?.titulo ?? `Obra #${registro.obra_id}`}</td><td>{registro.situacao === 1 ? "Disponível" : "Emprestado"}</td></>}
-          <td><span className={`cadastros-status ${registro.is_active ? "cadastros-status-ativo" : "cadastros-status-inativo"}`}>{registro.is_active ? "Ativo" : "Inativo"}</span></td><td><div className="cadastros-actions"><button type="button" onClick={() => setDetalhe(registro)}>Detalhes</button><button type="button" onClick={() => abrir(registro)}>Editar</button><button type="button" disabled={salvando} onClick={() => void alterarEstado(registro)}>{registro.is_active ? "Desativar" : "Ativar"}</button></div></td>
+          <td><span className={`cadastros-status ${registro.is_active ? "cadastros-status-ativo" : "cadastros-status-inativo"}`}>{registro.is_active ? "Ativo" : "Inativo"}</span></td><td><div className="cadastros-actions"><button type="button" onClick={() => abrir(registro)}><Pencil size={16} aria-hidden="true" />Editar</button><button className="cadastros-toggle" type="button" disabled={salvando} onClick={() => void alterarEstado(registro)}><Power size={16} aria-hidden="true" />{registro.is_active ? "Desativar" : "Ativar"}</button></div></td>
         </tr>)}</tbody></table></div>}
     {paginacao && <nav aria-label="Paginação" className="catalog-pagination"><button disabled={!paginacao.previous} onClick={() => setPagina(pagina - 1)}>Anterior</button><span>Página {pagina}</span><button disabled={!paginacao.next} onClick={() => setPagina(pagina + 1)}>Próxima</button></nav>}
   </section>;

@@ -110,4 +110,7 @@ h1 {
 .cadastros-status-ativo { color: #166534; background: #dcfce7; }
 .cadastros-status-inativo { color: #991b1b; background: #fee2e2; }
 .cadastros-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.catalog-table .cadastros-actions { flex-wrap: nowrap; }
 .cadastros-actions button:not(.primary-button) { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--primary-dark); }
+.cadastros-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.cadastros-actions .cadastros-toggle { min-width: 110px; }
