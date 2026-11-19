@@ -41,7 +41,9 @@ class CatalogoAPITests(TestCase):
         )
         self.assertEqual(resposta.status_code, 201, resposta.data)
         exemplar = resposta.data
-        self.assertEqual(exemplar["situacao"], SituacaoExemplar.DISPONIVEL)
+        situacao = resposta.json()["situacao"]
+        self.assertIs(type(situacao), int)
+        self.assertEqual(situacao, 1)
         self.assertEqual(exemplar["obra_id"], obra["id"])
         self.assertEqual(exemplar["created_by"], self.biblio.pk)
         self.assertIsNone(exemplar["id_totvs"])
@@ -136,7 +138,7 @@ class CatalogoAPITests(TestCase):
             ("/api/v1/obras", {"titulo": "Livro", "autor": "Autora", "created_by": 1}, "created_by"),
             ("/api/v1/obras", {"titulo": "Livro", "autor": "Autora", "id_totvs": "externo"}, "id_totvs"),
             ("/api/v1/exemplares", {"codigo": "ABC-1", "obra_id": obra.pk}, "codigo"),
-            ("/api/v1/exemplares", {"codigo": "ABC-2", "obra_id": obra.pk, "situacao": "EMPRESTADO"}, "situacao"),
+            ("/api/v1/exemplares", {"codigo": "ABC-2", "obra_id": obra.pk, "situacao": 2}, "situacao"),
         ):
             resposta = self.client.post(rota, dados, format="json")
             self.assertEqual(resposta.status_code, 400, resposta.data)
@@ -157,6 +159,11 @@ class CatalogoAPITests(TestCase):
             Obra.objects.create(titulo="Duplicada", autor="Autora", id_totvs="externo")
         with self.assertRaises(IntegrityError), transaction.atomic():
             Exemplar.objects.create(obra=obra, codigo="ABC-4", id_totvs="externo")
+
+    def test_situacao_invalida_e_rejeitada_pelo_banco(self):
+        obra = Obra.objects.create(titulo="Livro", autor="Autora")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Exemplar.objects.create(obra=obra, codigo="ABC-1", situacao=3)
 
 
 class ExemplarConcorrenciaTests(TransactionTestCase):

@@ -40,7 +40,7 @@ erDiagram
         integer id PK
         integer obra_id FK
         varchar codigo UK
-        varchar situacao
+        integer situacao
         varchar id_totvs UK "nullable"
         boolean is_active
         timestamp created_at
@@ -129,7 +129,7 @@ O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário)
 
 **Valores de `situacao`**
 
-- Em `exemplares`, `DISPONIVEL` ou `EMPRESTADO`. A desativação utiliza `is_active`.
+- Em `exemplares`, `1` representa `DISPONIVEL` e `2` representa `EMPRESTADO`. A desativação utiliza `is_active`.
 - Em `reservas`, os valores propostos são `SOLICITADA`, `CONFIRMADA`, `ATENDIDA` e `CANCELADA`. As transições são validadas e executadas pelo backend.
 
 ## Architecture

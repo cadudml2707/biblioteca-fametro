@@ -3,16 +3,15 @@ from django.db import models
 from core.base_model import BaseModel
 
 
-class SituacaoExemplar(models.TextChoices):
-    DISPONIVEL = "DISPONIVEL", "Disponível"
-    EMPRESTADO = "EMPRESTADO", "Emprestado"
+class SituacaoExemplar(models.IntegerChoices):
+    DISPONIVEL = 1, "Disponível"
+    EMPRESTADO = 2, "Emprestado"
 
 
 class Exemplar(BaseModel):
     obra = models.ForeignKey("obras.Obra", on_delete=models.PROTECT, related_name="exemplares")
     codigo = models.CharField(max_length=100)
-    situacao = models.CharField(
-        max_length=10,
+    situacao = models.PositiveSmallIntegerField(
         choices=SituacaoExemplar.choices,
         default=SituacaoExemplar.DISPONIVEL,
     )
