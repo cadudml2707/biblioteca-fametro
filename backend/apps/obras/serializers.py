@@ -1,12 +1,13 @@
 from rest_framework import serializers
 
-from core.serializers import CAMPOS_AUDITORIA, CatalogoSerializer
+from apps.reservas.services import pode_solicitar_reserva
+from core.serializers import CAMPOS_AUDITORIA, AuditedModelSerializer
 
 from . import services
 from .models import Obra
 
 
-class ObraSerializer(CatalogoSerializer):
+class ObraSerializer(AuditedModelSerializer):
     quantidade_disponivel = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -22,3 +23,14 @@ class ObraSerializer(CatalogoSerializer):
 
     def update(self, instance, validated_data):
         return services.atualizar_obra(instance, validated_data, self.context["request"].user)
+
+
+class ObraDetalheSerializer(ObraSerializer):
+    pode_solicitar_reserva = serializers.SerializerMethodField()
+
+    class Meta(ObraSerializer.Meta):
+        fields = (*ObraSerializer.Meta.fields, "pode_solicitar_reserva")
+        read_only_fields = (*ObraSerializer.Meta.read_only_fields, "pode_solicitar_reserva")
+
+    def get_pode_solicitar_reserva(self, obra):
+        return pode_solicitar_reserva(self.context["request"].user, obra)

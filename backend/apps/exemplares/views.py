@@ -1,13 +1,13 @@
 from rest_framework import generics
 
-from apps.usuarios.permissions import GerenciarCatalogo
+from apps.usuarios.permissions import EquipeBiblioteca
 
 from . import services
 from .serializers import ExemplarSerializer
 
 
 class ExemplaresViewMixin:
-    permission_classes = [GerenciarCatalogo]
+    permission_classes = [EquipeBiblioteca]
     serializer_class = ExemplarSerializer
 
     def get_queryset(self):

@@ -9,12 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import services
 from .models import Usuario
+from .permissions import Administrador
 from .serializers import IdentidadeSerializer, LoginSerializer, RefreshSerializer, UsuarioSerializer
-
-
-class Administrador(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user.is_authenticated and request.user.perfil == Usuario.Perfil.ADMINISTRADOR)
 
 
 class PublicTokenView(APIView):

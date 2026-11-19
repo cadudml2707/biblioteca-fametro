@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
 from apps.obras.models import Obra
-from core.serializers import CAMPOS_AUDITORIA, CatalogoSerializer
+from core.serializers import CAMPOS_AUDITORIA, AuditedModelSerializer
 
 from . import services
 from .models import Exemplar
 
 
-class ExemplarSerializer(CatalogoSerializer):
+class ExemplarSerializer(AuditedModelSerializer):
     obra_id = serializers.PrimaryKeyRelatedField(source="obra", queryset=Obra.objects.all())
 
     class Meta:

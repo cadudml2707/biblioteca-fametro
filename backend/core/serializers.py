@@ -6,7 +6,7 @@ from rest_framework import serializers
 CAMPOS_AUDITORIA = ("created_at", "created_by", "updated_at", "updated_by")
 
 
-class CatalogoSerializer(serializers.ModelSerializer):
+class AuditedModelSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         if not isinstance(data, Mapping):
             return super().to_internal_value(data)

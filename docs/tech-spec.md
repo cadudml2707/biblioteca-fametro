@@ -54,7 +54,7 @@ erDiagram
         integer usuario_id FK
         integer obra_id FK
         timestamp data_reserva
-        varchar situacao
+        integer situacao
         timestamp confirmada_em "nullable"
         timestamp data_limite "nullable"
         timestamp encerrada_em "nullable"
@@ -130,7 +130,18 @@ O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário)
 **Valores de `situacao`**
 
 - Em `exemplares`, `1` representa `DISPONIVEL` e `2` representa `EMPRESTADO`. A desativação utiliza `is_active`.
-- Em `reservas`, os valores propostos são `SOLICITADA`, `CONFIRMADA`, `ATENDIDA` e `CANCELADA`. As transições são validadas e executadas pelo backend.
+- Em `reservas`, `1` representa `SOLICITADA`, `2` representa `CONFIRMADA`, `3` representa `ATENDIDA` e `4` representa `CANCELADA`. Contam para o limite as reservas ativas nas situações solicitada e confirmada.
+
+**Gestão de reservas e configuração**
+
+| Método e rota | Uso |
+|---|---|
+| `GET /api/v1/reservas` | A equipe consulta o histórico e pode filtrar por `situacao`, `obra_id` e `usuario_id`. O aluno recebe somente as próprias reservas. |
+| `POST /api/v1/reservas/{id}/confirmar` | A equipe confirma uma solicitação e registra o prazo de retirada em dias corridos no fuso `America/Manaus`. |
+| `POST /api/v1/reservas/{id}/cancelar` | A equipe cancela uma reserva solicitada ou confirmada, registra o encerramento e libera a vaga no limite. A equipe também cancela as reservas vencidas. |
+| `GET`, `POST` e `PATCH /api/v1/configuracao-biblioteca` | O administrador consulta, cria ou edita a configuração ativa, com quatro parâmetros inteiros positivos. |
+
+Alterações no prazo de retirada se aplicam às próximas confirmações. Sem configuração ativa, novas solicitações e confirmações retornam `409` com o código `configuracao_ausente`, e o detalhe da obra retorna `pode_solicitar_reserva: false`.
 
 ## Architecture
 
@@ -327,7 +338,7 @@ Os contratos deverão fornecer os dados necessários à apresentação.
 - **Login** Access token, refresh token e usuário com ID, nome e perfil. O backend autoriza a plataforma e o perfil.
 - **Catálogo** Lista paginada com ID, título, autor e quantidade disponível calculada pelo backend.
 - **Detalhes** Dados bibliográficos, quantidade disponível e indicação `pode_solicitar_reserva` definida pelo backend.
-- **Reservas** ID, obra, situação, descrição da situação e datas. As descrições e os valores exibidos seguem o retorno da API.
+- **Reservas** ID, obra, código numérico em `situacao`, descrição em `situacao_descricao` e datas. As descrições e os valores exibidos seguem o retorno da API.
 - **Erros** Código, mensagem e erros por campo, quando aplicável. O aplicativo apresenta o retorno do backend.
 
 Ao solicitar uma reserva, o aplicativo envia o ID da obra. O backend identifica o aluno autenticado, valida a operação e devolve o resultado. Após o sucesso, o aplicativo consulta novamente os detalhes e as reservas para apresentar o estado confirmado no servidor.
@@ -397,7 +408,7 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 - [x] **Phase 1 — Core & Infrastructure** Criar Django/DRF, PostgreSQL e Docker Compose. Configurar `AutoField` e implementar a classe abstrata `BaseModel` com `is_active`, `created_at`, `created_by`, `updated_at` e `updated_by`.
 - [x] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT com login, refresh, logout e consulta da identidade, perfis e administração local. Os endpoints usados pelo mobile devem estar disponíveis nesta etapa.
 - [x] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
-- [ ] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
+- [x] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
 - [ ] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
 - [ ] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend.
 - [ ] **Phase 7 — TOTVS Sync** Implementar a consulta à API e o processamento exclusivo de obras e exemplares, com identificação dos registros e gravação transacional.
