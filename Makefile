@@ -5,7 +5,7 @@ COMPOSE := docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help env config up dev build down stop restart logs ps backend-shell db-shell migrate backend-check backend-test check-migrations
+.PHONY: help env config up build down stop restart logs ps backend-shell db-shell migrate backend-check backend-test check-migrations
 
 help: ## Exibir os comandos disponíveis
 	@awk 'BEGIN {FS = ":.*##"; printf "Uso: make <comando>\n\n"} /^[a-zA-Z0-9_-]+:.*##/ {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -23,8 +23,6 @@ config: ## Validar a configuração do Docker Compose
 
 up: ## Construir e iniciar os serviços em segundo plano
 	$(COMPOSE) up --build -d
-
-dev: up ## Atalho para up
 
 build: ## Construir as imagens dos serviços
 	$(COMPOSE) build

@@ -20,6 +20,8 @@ make backend-test
 make check-migrations
 ```
 
+O `make up` inicia o frontend com atualização automática: mudanças em `frontend/src` e `frontend/public` aparecem no navegador sem reconstruir a imagem. Mudanças nas dependências (`package.json` ou `package-lock.json`) exigem executar `make up` novamente; mudanças em arquivos de configuração podem exigir reiniciar o frontend com o mesmo comando.
+
 O frontend fica em `http://127.0.0.1:3000/` e a API em `http://127.0.0.1:8000/` por padrão; altere `FRONTEND_PORT` ou `BACKEND_PORT` se necessário. No acesso web, o Next.js se comunica com o backend pela rede interna do Compose. O Compose espera o PostgreSQL estar pronto. Migrações são executadas explicitamente, não automaticamente na inicialização.
 
 ```bash
@@ -28,7 +30,7 @@ make logs
 make down
 ```
 
-Use `make help` para listar todos os comandos. Os comandos Django usam os containers em execução. Como o código é copiado para as imagens, execute `make up` novamente após alterações no backend ou frontend. Para rodar testes de tipos do frontend localmente, execute `npm ci` e `npm run typecheck` dentro de `frontend/`. Para usar outro arquivo de ambiente, informe `ENV_FILE`, por exemplo: `make ENV_FILE=/caminho/ambiente.env up`.
+Use `make help` para listar todos os comandos. Os comandos Django usam os containers em execução. O código do backend é copiado para a imagem; execute `make up` novamente após alterá-lo. Para rodar testes de tipos do frontend localmente, execute `npm ci` e `npm run typecheck` dentro de `frontend/`. Para usar outro arquivo de ambiente, informe `ENV_FILE`, por exemplo: `make ENV_FILE=/caminho/ambiente.env up`.
 
 O volume nomeado do PostgreSQL é preservado pelo `down` e pela recriação dos containers. Remover o volume apaga os dados. Se as credenciais do PostgreSQL forem alteradas após a inicialização do volume, a configuração existente do banco deve ser atualizada separadamente.
 

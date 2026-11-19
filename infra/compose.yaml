@@ -36,6 +36,13 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.frontend
+      target: dev
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+      - ../frontend/next.config.ts:/app/next.config.ts
+      - ../frontend/tsconfig.json:/app/tsconfig.json
+      - ../frontend/postcss.config.mjs:/app/postcss.config.mjs
     environment:
       BACKEND_API_URL: http://backend:8000
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
