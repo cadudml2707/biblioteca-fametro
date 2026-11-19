@@ -143,6 +143,17 @@ O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário)
 
 Alterações no prazo de retirada se aplicam às próximas confirmações. Sem configuração ativa, novas solicitações e confirmações retornam `409` com o código `configuracao_ausente`, e o detalhe da obra retorna `pode_solicitar_reserva: false`.
 
+**Circulação do acervo**
+
+| Método e rota | Uso |
+|---|---|
+| `POST /api/v1/emprestimos` | A equipe envia `usuario_id`, `exemplar_id` e, se houver, `reserva_id`. A retirada fixa a data prevista, marca o exemplar como emprestado e atende a reserva vinculada. |
+| `GET /api/v1/emprestimos` | A equipe consulta o histórico, com filtros por `usuario_id`, `exemplar_id` e `situacao` (`ativo` ou `devolvido`). |
+| `GET /api/v1/emprestimos/{id}` | A equipe consulta os dados e as datas do empréstimo. |
+| `POST /api/v1/emprestimos/{id}/devolver` | A equipe encerra o empréstimo e libera o exemplar. Chamadas repetidas retornam o encerramento original. |
+
+A data prevista usa a data local da retirada em `America/Manaus` e o prazo vigente em dias corridos. A retirada só atende reserva ativa e confirmada, dentro do prazo e do mesmo aluno e obra. A equipe pode devolver exemplares com aluno inativo ou configuração ausente. Durante empréstimo ativo, a edição do exemplar bloqueia sua desativação e a troca da obra vinculada.
+
 ## Architecture
 
 Monólito Django/DRF com um app separado para cada model de domínio. O backend é responsável por toda a lógica de negócio, validação de dados, autorização, consultas, filtros, cálculos e processamento.
@@ -409,7 +420,7 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 - [x] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT com login, refresh, logout e consulta da identidade, perfis e administração local. Os endpoints usados pelo mobile devem estar disponíveis nesta etapa.
 - [x] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
 - [x] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
-- [ ] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
+- [x] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
 - [ ] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend.
 - [ ] **Phase 7 — TOTVS Sync** Implementar a consulta à API e o processamento exclusivo de obras e exemplares, com identificação dos registros e gravação transacional.
 - [ ] **Phase 8 — Verification** Verificar permissões, auditoria dos campos comuns, integridade das operações e funcionamento independente do TOTVS.

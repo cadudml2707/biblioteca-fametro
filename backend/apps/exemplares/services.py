@@ -39,7 +39,13 @@ def atualizar_exemplar(exemplar, dados, ator):
     except Exemplar.DoesNotExist as exc:
         raise NotFound() from exc
 
-    if "obra" in dados and dados["obra"].pk != exemplar.obra_id:
+    troca_obra = "obra" in dados and dados["obra"].pk != exemplar.obra_id
+    desativacao = dados.get("is_active") is False
+    if (troca_obra or desativacao) and exemplar.emprestimos.filter(is_active=True).exists():
+        campo = "is_active" if desativacao else "obra_id"
+        raise ValidationError({campo: ["O exemplar tem um empréstimo ativo."]})
+
+    if troca_obra:
         validar_novo_vinculo(dados["obra"].pk)
 
     for campo, valor in dados.items():

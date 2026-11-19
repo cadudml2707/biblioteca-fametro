@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.exemplares.apps.ExemplaresConfig",
     "apps.configuracao_biblioteca.apps.ConfiguracaoBibliotecaConfig",
     "apps.reservas.apps.ReservasConfig",
+    "apps.emprestimos.apps.EmprestimosConfig",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

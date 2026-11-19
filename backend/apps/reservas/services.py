@@ -87,3 +87,24 @@ def cancelar_reserva(reserva_id, ator):
     reserva.updated_by = ator
     reserva.save(update_fields=["situacao", "is_active", "encerrada_em", "updated_by", "updated_at"])
     return reserva
+
+
+def atender_reserva_na_retirada(reserva_id, aluno_id, obra_id, agora, ator):
+    reserva = Reserva.objects.select_for_update().filter(
+        pk=reserva_id,
+        usuario_id=aluno_id,
+        obra_id=obra_id,
+        is_active=True,
+        situacao=SituacaoReserva.CONFIRMADA,
+    ).first()
+    if reserva is None:
+        raise ValidationError({"reserva_id": ["Selecione uma reserva ativa e confirmada do aluno para esta obra."]})
+    if reserva.data_limite is None or agora > reserva.data_limite:
+        raise ValidationError({"reserva_id": ["O prazo de retirada da reserva venceu."]})
+
+    reserva.situacao = SituacaoReserva.ATENDIDA
+    reserva.is_active = False
+    reserva.encerrada_em = agora
+    reserva.updated_by = ator
+    reserva.save(update_fields=["situacao", "is_active", "encerrada_em", "updated_by", "updated_at"])
+    return reserva
