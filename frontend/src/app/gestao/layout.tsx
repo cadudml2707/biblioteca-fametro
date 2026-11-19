@@ -8,12 +8,12 @@ import { sharedSession, type User } from "@/lib/auth";
 const sections = [
   { label: "Início", icon: LayoutDashboard, active: true },
   { label: "Obras", icon: BookOpen, href: "/gestao/obras" },
-  { label: "Exemplares", icon: LibraryBig },
+  { label: "Exemplares", icon: LibraryBig, href: "/gestao/exemplares" },
   { label: "Reservas", icon: CalendarClock },
   { label: "Circulação", icon: BookCopy },
   { label: "Relatórios", icon: ChartNoAxesCombined },
 ];
-const adminSections = [{ label: "Usuários", icon: Users }, { label: "Configurações", icon: Settings2 }];
+const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2 }];
 
 export default function GestaoLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -58,10 +58,12 @@ export default function GestaoLayout({ children }: { children: React.ReactNode }
           {user.perfil === 3 && (
             <>
               <div className="nav-section admin-section">Administração</div>
-              {adminSections.map(({ label, icon: Icon }) => (
-                <div className="nav-item unavailable" key={label} aria-disabled="true">
+              {adminSections.map(({ label, icon: Icon, href }) => href ? (
+                <a href={href} key={label} className={pathname === href ? "nav-item active" : "nav-item"} aria-current={pathname === href ? "page" : undefined}>
                   <Icon size={19} aria-hidden="true" /> {label}
-                </div>
+                </a>
+              ) : (
+                <div className="nav-item unavailable" key={label} aria-disabled="true"><Icon size={19} aria-hidden="true" /> {label}</div>
               ))}
             </>
           )}

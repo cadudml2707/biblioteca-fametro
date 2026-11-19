@@ -429,7 +429,7 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 
 - [x] **Phase 1 — Web Setup & Auth** Preparar Next.js com TypeScript, login e apresentação da navegação fornecida pelo perfil autenticado.
 - [ ] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
-- [ ] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
+- [x] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
 - [ ] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
 - [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares.
 - [ ] **Phase 6 — Backend & Web Acceptance** Conferir os fluxos de gerenciamento e os contratos da API antes do mobile.

@@ -91,3 +91,17 @@ h1 {
 .catalog-table th { background: #edf3f8; }
 .catalog-pagination { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
 .catalog-pagination button { padding: .6rem 1rem; }
+
+.cadastros { max-width: 1200px; }
+.cadastros h1 { font-size: 2rem; }
+.cadastros-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.cadastros-form { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; max-width: 720px; display: grid; gap: 16px; }
+.cadastros-form h2 { font-size: 1.25rem; }
+.cadastros-field { display: grid; gap: 6px; }
+.cadastros-field label { font-weight: 600; }
+.cadastros-field input, .cadastros-field select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.cadastros-field select:focus-visible { outline: 3px solid #38a8b3; outline-offset: 3px; }
+.cadastros-error { color: #b42332; }
+.cadastros-message { margin-bottom: 16px; }
+.cadastros-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cadastros-actions button:not(.primary-button) { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--primary-dark); }
