@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FalhaApi } from "@/lib/api/cliente";
 import { requisitar, type Recurso, type Pagina, type ObraCadastro } from "@/lib/api/cadastros";
 
@@ -36,6 +36,12 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
   const [falhaLista, setFalhaLista] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (editando !== undefined && dialog && !dialog.open) dialog.showModal();
+  }, [editando]);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -105,19 +111,21 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
 
   return <section className="cadastros">
     <div className="cadastros-heading"><h1>{titulos[recurso]}</h1>{!acessoNegado && <button className="primary-button" type="button" onClick={() => abrir(null)}>Novo cadastro</button>}</div>
-    {mensagem && <p className="cadastros-message" role="status">{mensagem}</p>}
+    {mensagem && editando === undefined && <p className="cadastros-message" role="status">{mensagem}</p>}
     {detalhe && <section className="cadastros-form" aria-labelledby="titulo-detalhes">
       <h2 id="titulo-detalhes">Detalhes do cadastro</h2>
       <p><strong>ID</strong> {detalhe.id}</p>
       {campos[recurso].filter(campo => campo.nome !== "password").map(campo =>
         <p key={campo.nome}><strong>{campo.rotulo}</strong> {campo.nome === "obra_id" ? obras.find(obra => obra.id === detalhe.obra_id)?.titulo ?? String(detalhe.obra_id) : campo.nome === "perfil" ? ({1:"Aluno",2:"Bibliotecário",3:"Administrador"} as Record<number,string>)[Number(detalhe.perfil)] : String(detalhe[campo.nome] ?? "—")}</p>
       )}
-      <p><strong>Estado</strong> {detalhe.is_active ? "Ativo" : "Inativo"}</p>
+      <p><strong>Status</strong> <span className={`cadastros-status ${detalhe.is_active ? "cadastros-status-ativo" : "cadastros-status-inativo"}`}>{detalhe.is_active ? "Ativo" : "Inativo"}</span></p>
       {recurso === "exemplares" && <p><strong>Situação</strong> {detalhe.situacao === 1 ? "Disponível" : "Emprestado"}</p>}
       <div className="cadastros-actions"><button type="button" onClick={() => setDetalhe(null)}>Fechar</button></div>
     </section>}
-    {editando !== undefined && <form className="cadastros-form" onSubmit={salvar}>
-      <h2>{editando ? "Editar cadastro" : "Novo cadastro"}</h2>
+    {editando !== undefined && <dialog ref={dialogRef} className="cadastros-dialog" aria-labelledby="titulo-formulario" onCancel={event => { if (salvando) event.preventDefault(); }} onClose={() => setEditando(undefined)}>
+      <form className="cadastros-form cadastros-dialog-form" onSubmit={salvar}>
+      <h2 id="titulo-formulario">{editando ? "Editar cadastro" : "Novo cadastro"}</h2>
+      {mensagem && <p className="cadastros-message" role="alert">{mensagem}</p>}
       {campos[recurso].map(campo => <div className="cadastros-field" key={campo.nome}>
         <label htmlFor={campo.nome}>{campo.rotulo}</label>
         {campo.nome === "perfil" ? <select id={campo.nome} value={valores[campo.nome]} onChange={e => setValores({ ...valores, [campo.nome]: e.target.value })} required>
@@ -128,19 +136,20 @@ export function Cadastros({ recurso }: { recurso: Recurso }) {
         {erros[campo.nome] && <p id={`erro-${campo.nome}`} className="cadastros-error" role="alert">{erros[campo.nome].join(" ")}</p>}
       </div>)}
       <div className="cadastros-actions"><button className="primary-button" disabled={salvando}>{salvando ? "Salvando..." : "Salvar"}</button><button type="button" disabled={salvando} onClick={() => setEditando(undefined)}>Cancelar</button></div>
-    </form>}
+      </form>
+    </dialog>}
     {recurso === "obras" && <form className="catalog-search" onSubmit={e => { e.preventDefault(); setPagina(1); setTermo(busca); }}>
       <label htmlFor="busca">Buscar por título, autor ou ISBN</label><div><input id="busca" value={busca} onChange={e => setBusca(e.target.value)} /><button className="primary-button">Buscar</button></div>
     </form>}
     {carregando ? <p role="status">Carregando...</p> : falhaLista ? (!acessoNegado && <button type="button" onClick={() => void carregar()}>Tentar novamente</button>) : registros.length === 0 ? <p>Nenhum cadastro encontrado.</p> :
       <div className="catalog-table"><table><thead><tr>
         {recurso === "obras" ? <><th>Título</th><th>Autor</th><th>Disponíveis</th></> : recurso === "usuarios" ? <><th>Nome</th><th>E-mail</th><th>Perfil</th></> : <><th>Código</th><th>Obra</th><th>Situação</th></>}
-        <th>Estado</th><th>Ações</th></tr></thead><tbody>
+        <th>Status</th><th>Ações</th></tr></thead><tbody>
         {registros.map(registro => <tr key={registro.id}>
           {recurso === "obras" ? <><td>{String(registro.titulo)}</td><td>{String(registro.autor)}</td><td>{String(registro.quantidade_disponivel)}</td></> :
             recurso === "usuarios" ? <><td>{String(registro.nome)}</td><td>{String(registro.email)}</td><td>{({1:"Aluno",2:"Bibliotecário",3:"Administrador"} as Record<number,string>)[Number(registro.perfil)]}</td></> :
             <><td>{String(registro.codigo)}</td><td>{obras.find(obra => obra.id === registro.obra_id)?.titulo ?? `Obra #${registro.obra_id}`}</td><td>{registro.situacao === 1 ? "Disponível" : "Emprestado"}</td></>}
-          <td>{registro.is_active ? "Ativo" : "Inativo"}</td><td><div className="cadastros-actions"><button type="button" onClick={() => setDetalhe(registro)}>Detalhes</button><button type="button" onClick={() => abrir(registro)}>Editar</button><button type="button" disabled={salvando} onClick={() => void alterarEstado(registro)}>{registro.is_active ? "Desativar" : "Ativar"}</button></div></td>
+          <td><span className={`cadastros-status ${registro.is_active ? "cadastros-status-ativo" : "cadastros-status-inativo"}`}>{registro.is_active ? "Ativo" : "Inativo"}</span></td><td><div className="cadastros-actions"><button type="button" onClick={() => setDetalhe(registro)}>Detalhes</button><button type="button" onClick={() => abrir(registro)}>Editar</button><button type="button" disabled={salvando} onClick={() => void alterarEstado(registro)}>{registro.is_active ? "Desativar" : "Ativar"}</button></div></td>
         </tr>)}</tbody></table></div>}
     {paginacao && <nav aria-label="Paginação" className="catalog-pagination"><button disabled={!paginacao.previous} onClick={() => setPagina(pagina - 1)}>Anterior</button><span>Página {pagina}</span><button disabled={!paginacao.next} onClick={() => setPagina(pagina + 1)}>Próxima</button></nav>}
   </section>;

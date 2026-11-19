@@ -97,11 +97,17 @@ h1 {
 .cadastros-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .cadastros-form { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; max-width: 720px; display: grid; gap: 16px; }
 .cadastros-form h2 { font-size: 1.25rem; }
+.cadastros-dialog { width: min(720px, calc(100% - 32px)); max-width: none; max-height: calc(100dvh - 32px); margin: auto; padding: 0; border: 0; border-radius: 14px; color: inherit; box-shadow: 0 24px 70px rgb(4 30 54 / 25%); }
+.cadastros-dialog::backdrop { background: rgb(5 27 48 / 55%); }
+.cadastros-dialog-form { max-width: none; margin: 0; border: 0; }
 .cadastros-field { display: grid; gap: 6px; }
 .cadastros-field label { font-weight: 600; }
 .cadastros-field input, .cadastros-field select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }
 .cadastros-field select:focus-visible { outline: 3px solid #38a8b3; outline-offset: 3px; }
 .cadastros-error { color: #b42332; }
 .cadastros-message { margin-bottom: 16px; }
+.cadastros-status { display: inline-block; border-radius: 999px; padding: 4px 12px; font-size: 0.875rem; font-weight: 600; line-height: 1.4; }
+.cadastros-status-ativo { color: #166534; background: #dcfce7; }
+.cadastros-status-inativo { color: #991b1b; background: #fee2e2; }
 .cadastros-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .cadastros-actions button:not(.primary-button) { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--primary-dark); }
