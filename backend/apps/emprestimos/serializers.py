@@ -11,6 +11,12 @@ class EmprestimoSerializer(AuditedModelSerializer):
     exemplar_id = serializers.IntegerField(min_value=1)
     reserva_id = serializers.IntegerField(min_value=1, required=False, allow_null=True)
 
+    def to_representation(self, instance):
+        dados = super().to_representation(instance)
+        dados["aluno"] = {"id": instance.usuario_id, "nome": instance.usuario.nome, "email": instance.usuario.email, "is_active": instance.usuario.is_active}
+        dados["exemplar"] = {"id": instance.exemplar_id, "codigo": instance.exemplar.codigo, "obra_id": instance.exemplar.obra_id, "obra_titulo": instance.exemplar.obra.titulo}
+        return dados
+
     class Meta:
         model = Emprestimo
         read_only_fields = ("id", "is_active", "data_retirada", "data_prevista", "data_devolucao", *CAMPOS_AUDITORIA)

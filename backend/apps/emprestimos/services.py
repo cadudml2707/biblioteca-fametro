@@ -15,7 +15,7 @@ from .models import Emprestimo
 
 
 def consultar_emprestimos():
-    return Emprestimo.objects.order_by("-data_retirada", "-id")
+    return Emprestimo.objects.select_related("usuario", "exemplar__obra").order_by("-data_retirada", "-id")
 
 
 def atualizar_situacao_exemplar(exemplar, situacao, ator):

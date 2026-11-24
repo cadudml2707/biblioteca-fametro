@@ -9,8 +9,8 @@ const sections = [
   { label: "Início", icon: LayoutDashboard, active: true },
   { label: "Obras", icon: BookOpen, href: "/gestao/obras" },
   { label: "Exemplares", icon: LibraryBig, href: "/gestao/exemplares" },
-  { label: "Reservas", icon: CalendarClock },
-  { label: "Circulação", icon: BookCopy },
+  { label: "Reservas", icon: CalendarClock, href: "/gestao/reservas" },
+  { label: "Circulação", icon: BookCopy, href: "/gestao/circulacao" },
   { label: "Relatórios", icon: ChartNoAxesCombined },
 ];
 const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2 }];

@@ -17,6 +17,13 @@ class ReservaSerializer(AuditedModelSerializer):
     obra = ObraDaReservaSerializer(read_only=True)
     situacao_descricao = serializers.CharField(source="get_situacao_display", read_only=True)
 
+    def to_representation(self, instance):
+        dados = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and request.user.perfil in (2, 3):
+            dados["aluno"] = {"id": instance.usuario_id, "nome": instance.usuario.nome, "email": instance.usuario.email, "is_active": instance.usuario.is_active}
+        return dados
+
     class Meta:
         model = Reserva
         read_only_fields = (

@@ -13,7 +13,7 @@ from .models import SITUACOES_ATIVAS, Reserva, SituacaoReserva
 
 
 def consultar_reservas(ator, filtros):
-    reservas = Reserva.objects.select_related("obra").order_by("-data_reserva", "-id")
+    reservas = Reserva.objects.select_related("obra", "usuario").order_by("-data_reserva", "-id")
     if ator.perfil == Usuario.Perfil.ALUNO:
         return reservas.filter(usuario=ator)
     return reservas.filter(**filtros)

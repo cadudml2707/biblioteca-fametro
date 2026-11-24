@@ -114,3 +114,6 @@ h1 {
 .cadastros-actions button:not(.primary-button) { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--primary-dark); }
 .cadastros-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .cadastros-actions .cadastros-toggle { min-width: 110px; }
+.circulacao-filtros { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.circulacao-filtros label { display: grid; gap: 6px; font-weight: 600; min-width: 180px; }
+.circulacao-filtros select { min-height: 44px; max-width: 320px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }

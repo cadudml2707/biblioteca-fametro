@@ -63,3 +63,10 @@ class IdentidadeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ("id", "nome", "email", "perfil")
+
+
+class AlunoConsultaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ("id", "nome", "email", "is_active")
+        read_only_fields = fields

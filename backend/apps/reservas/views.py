@@ -33,7 +33,7 @@ class ConfirmarReservaView(APIView):
 
     def post(self, request, pk):
         reserva = services.confirmar_reserva(pk, request.user)
-        return Response(ReservaSerializer(reserva).data)
+        return Response(ReservaSerializer(reserva, context={"request": request}).data)
 
 
 class CancelarReservaView(APIView):
@@ -41,4 +41,4 @@ class CancelarReservaView(APIView):
 
     def post(self, request, pk):
         reserva = services.cancelar_reserva(pk, request.user)
-        return Response(ReservaSerializer(reserva).data)
+        return Response(ReservaSerializer(reserva, context={"request": request}).data)

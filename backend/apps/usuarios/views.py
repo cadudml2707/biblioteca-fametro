@@ -1,16 +1,18 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import services
 from .models import Usuario
-from .permissions import Administrador
-from .serializers import IdentidadeSerializer, LoginSerializer, RefreshSerializer, UsuarioSerializer
+from .permissions import Administrador, EquipeBiblioteca
+from .serializers import AlunoConsultaSerializer, IdentidadeSerializer, LoginSerializer, RefreshSerializer, UsuarioSerializer
 
 
 class PublicTokenView(APIView):
@@ -78,6 +80,22 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
     queryset = Usuario.objects.order_by("id")
     serializer_class = UsuarioSerializer
     permission_classes = [Administrador]
+
+
+class PaginacaoAlunos(PageNumberPagination):
+    page_size = 20
+
+
+class AlunoConsultaView(generics.ListAPIView):
+    serializer_class = AlunoConsultaSerializer
+    permission_classes = [EquipeBiblioteca]
+    pagination_class = PaginacaoAlunos
+
+    def get_queryset(self):
+        termo = self.request.query_params.get("search", "").strip()
+        return Usuario.objects.filter(perfil=Usuario.Perfil.ALUNO).filter(
+            Q(nome__icontains=termo) | Q(email__icontains=termo)
+        ).order_by("nome", "id")
 
 
 class UsuarioDetailView(generics.RetrieveUpdateAPIView):

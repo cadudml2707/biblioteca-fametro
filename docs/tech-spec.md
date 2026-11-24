@@ -136,12 +136,15 @@ O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário)
 
 | Método e rota | Uso |
 |---|---|
+| `GET /api/v1/alunos` | A equipe pesquisa alunos por nome ou e-mail (`search`), com paginação (`page`); retorna identificador, nome, e-mail e estado, inclusive alunos inativos. |
 | `GET /api/v1/reservas` | A equipe consulta o histórico e pode filtrar por `situacao`, `obra_id` e `usuario_id`. O aluno recebe somente as próprias reservas. |
 | `POST /api/v1/reservas/{id}/confirmar` | A equipe confirma uma solicitação e registra o prazo de retirada em dias corridos no fuso `America/Manaus`. |
 | `POST /api/v1/reservas/{id}/cancelar` | A equipe cancela uma reserva solicitada ou confirmada, registra o encerramento e libera a vaga no limite. A equipe também cancela as reservas vencidas. |
 | `GET`, `POST` e `PATCH /api/v1/configuracao-biblioteca` | O administrador consulta, cria ou edita a configuração ativa, com quatro parâmetros inteiros positivos. |
 
 Alterações no prazo de retirada se aplicam às próximas confirmações. Sem configuração ativa, novas solicitações e confirmações retornam `409` com o código `configuracao_ausente`, e o detalhe da obra retorna `pode_solicitar_reserva: false`.
+
+Para a equipe, as respostas de reservas incluem identificação do aluno. A resposta do aluno no mobile não inclui esse campo adicional.
 
 **Circulação do acervo**
 
@@ -153,6 +156,8 @@ Alterações no prazo de retirada se aplicam às próximas confirmações. Sem c
 | `POST /api/v1/emprestimos/{id}/devolver` | A equipe encerra o empréstimo e libera o exemplar. Chamadas repetidas retornam o encerramento original. |
 
 A data prevista usa a data local da retirada em `America/Manaus` e o prazo vigente em dias corridos. A retirada só atende reserva ativa e confirmada, dentro do prazo e do mesmo aluno e obra. A equipe pode devolver exemplares com aluno inativo ou configuração ausente. Durante empréstimo ativo, a edição do exemplar bloqueia sua desativação e a troca da obra vinculada.
+
+As respostas de empréstimos incluem identificação do aluno e do exemplar, incluindo o título da obra, além dos identificadores já existentes.
 
 ## Architecture
 
@@ -428,9 +433,9 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 ### Frontend Implementation Plan
 
 - [x] **Phase 1 — Web Setup & Auth** Preparar Next.js com TypeScript, login e apresentação da navegação fornecida pelo perfil autenticado.
-- [ ] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
+- [x] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
 - [x] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
-- [ ] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
+- [x] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
 - [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares.
 - [ ] **Phase 6 — Backend & Web Acceptance** Conferir os fluxos de gerenciamento e os contratos da API antes do mobile.
 
