@@ -1,5 +1,5 @@
-import { Relatorios } from "@/components/gestao/relatorios";
+import { redirect } from "next/navigation";
 
 export default function RelatoriosPage() {
-  return <Relatorios />;
+  redirect("/gestao");
 }

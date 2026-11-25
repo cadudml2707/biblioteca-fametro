@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { ArrowRight, BookCopy, BookOpen, CalendarClock, ChartNoAxesCombined, CircleHelp, LayoutDashboard, LibraryBig, LogOut, Settings2, Users } from "lucide-react";
+import { ArrowRight, BookCopy, BookOpen, CalendarClock, CircleHelp, LayoutDashboard, LibraryBig, LogOut, Settings2, Users } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { sharedSession, type User } from "@/lib/auth";
 
@@ -11,7 +11,6 @@ const sections = [
   { label: "Exemplares", icon: LibraryBig, href: "/gestao/exemplares" },
   { label: "Reservas", icon: CalendarClock, href: "/gestao/reservas" },
   { label: "Circulação", icon: BookCopy, href: "/gestao/circulacao" },
-  { label: "Relatórios", icon: ChartNoAxesCombined, href: "/gestao/relatorios" },
 ];
 const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2, href: "/gestao/configuracoes" }];
 
