@@ -117,3 +117,11 @@ h1 {
 .circulacao-filtros { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .circulacao-filtros label { display: grid; gap: 6px; font-weight: 600; min-width: 180px; }
 .circulacao-filtros select { min-height: 44px; max-width: 320px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.configuracoes-intro { margin-top: 6px; color: var(--muted); }
+.configuracoes-form { width: min(100%, 760px); }
+.configuracoes-form input { width: 100%; max-width: 260px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.configuracoes-descricao { color: var(--muted); font-size: .925rem; }
+.configuracoes-aviso,.configuracoes-erro { padding: 12px 14px; border-radius: 8px; background: #fff4d6; color: #6f4b00; margin-bottom: 16px; }
+.configuracoes-erro { background: #fdebed; color: #9d2432; }
+.configuracoes-sucesso { color: #166534; }
+.configuracoes-form button:not(.primary-button) { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--primary-dark); }

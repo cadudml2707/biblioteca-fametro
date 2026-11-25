@@ -13,7 +13,7 @@ const sections = [
   { label: "Circulação", icon: BookCopy, href: "/gestao/circulacao" },
   { label: "Relatórios", icon: ChartNoAxesCombined },
 ];
-const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2 }];
+const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2, href: "/gestao/configuracoes" }];
 
 export default function GestaoLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -58,12 +58,10 @@ export default function GestaoLayout({ children }: { children: React.ReactNode }
           {user.perfil === 3 && (
             <>
               <div className="nav-section admin-section">Administração</div>
-              {adminSections.map(({ label, icon: Icon, href }) => href ? (
+              {adminSections.map(({ label, icon: Icon, href }) => (
                 <a href={href} key={label} className={pathname === href ? "nav-item active" : "nav-item"} aria-current={pathname === href ? "page" : undefined}>
                   <Icon size={19} aria-hidden="true" /> {label}
                 </a>
-              ) : (
-                <div className="nav-item unavailable" key={label} aria-disabled="true"><Icon size={19} aria-hidden="true" /> {label}</div>
               ))}
             </>
           )}
