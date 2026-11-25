@@ -103,6 +103,7 @@ h1 {
 .cadastros-field { display: grid; gap: 6px; }
 .cadastros-field label { font-weight: 600; }
 .cadastros-field input, .cadastros-field select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.retirada-form .cadastros-field select:disabled { background: #edf3f8; color: #52697d; cursor: not-allowed; opacity: .75; }
 .cadastros-field select:focus-visible { outline: 3px solid #38a8b3; outline-offset: 3px; }
 .cadastros-error { color: #b42332; }
 .cadastros-message { margin-bottom: 16px; }
