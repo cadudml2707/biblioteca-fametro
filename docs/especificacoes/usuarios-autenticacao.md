@@ -4,7 +4,7 @@
 
 A API usa JSON e prefixo `/api/v1`. O campo `perfil` é numérico: `1` para `ALUNO` (Aluno), `2` para `BIBLIOTECARIO` (Bibliotecário) e `3` para `ADMINISTRADOR` (Administrador). As rotas não têm barra final. Todos os erros têm `codigo`, `mensagem` e, para erros de validação, `erros` com detalhes por campo. Senhas e tokens nunca são retornados em cadastros ou consultas de usuários.
 
-- `POST /login`: recebe `email`, `password` e `plataforma` (`web` ou `mobile`); retorna `access`, `refresh` e `usuario` com `id`, `nome` e `perfil`. Mobile aceita somente `ALUNO`; web aceita `BIBLIOTECARIO` e `ADMINISTRADOR`.
+- `POST /login`: recebe `email`, `password` e `plataforma` (`web` ou `mobile`); retorna `access`, `refresh` e `usuario` com `id`, `nome` e `perfil`. Mobile aceita somente `ALUNO`; web aceita `ALUNO`, `BIBLIOTECARIO` e `ADMINISTRADOR`, com permissões de acordo com o perfil.
 - `POST /auth/refresh`: recebe `refresh` válido, retorna novos `access` e `refresh` e revoga o refresh anterior. Retentativas com token revogado são recusadas. A plataforma original e o perfil atual devem continuar compatíveis.
 - `POST /logout`: recebe `refresh` pertencente ao usuário autenticado e o revoga; responde 204. A revogação de refresh não revoga access já emitido, que expira em até 15 minutos. Desativação ou alteração incompatível de perfil bloqueia access na próxima requisição.
 - `GET /me`: com Bearer válido, retorna `id`, `nome`, `email` e `perfil` atuais.

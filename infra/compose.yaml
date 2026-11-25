@@ -47,7 +47,7 @@ services:
       BACKEND_API_URL: http://backend:8000
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     depends_on:
       backend:
         condition: service_started

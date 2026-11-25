@@ -24,6 +24,8 @@ O `make up` inicia o frontend com atualização automática: mudanças em `front
 
 O frontend fica em `http://127.0.0.1:3000/` e a API em `http://127.0.0.1:8000/` por padrão; altere `FRONTEND_PORT` ou `BACKEND_PORT` se necessário. No acesso web, o Next.js se comunica com o backend pela rede interna do Compose. O Compose espera o PostgreSQL estar pronto. Migrações são executadas explicitamente, não automaticamente na inicialização.
 
+Para acessar o site em um celular na mesma rede, configure `FRONTEND_BIND_ADDRESS=0.0.0.0` em `infra/.env` e recrie os serviços com `make up`. Abra `http://IP_DO_COMPUTADOR:3000` no celular, substituindo pelo IP da interface de rede do computador. A porta deve estar liberada no firewall; em WSL, a configuração de rede do Windows pode exigir encaminhamento adicional. Essa configuração expõe o frontend à rede local e destina-se ao desenvolvimento. Para voltar ao acesso local, use `127.0.0.1` e execute `make up` novamente.
+
 ```bash
 make ps
 make logs

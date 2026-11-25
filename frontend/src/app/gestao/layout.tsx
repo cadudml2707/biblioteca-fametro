@@ -11,7 +11,7 @@ const sections = [
   { label: "Exemplares", icon: LibraryBig, href: "/gestao/exemplares" },
   { label: "Reservas", icon: CalendarClock, href: "/gestao/reservas" },
   { label: "Circulação", icon: BookCopy, href: "/gestao/circulacao" },
-  { label: "Relatórios", icon: ChartNoAxesCombined },
+  { label: "Relatórios", icon: ChartNoAxesCombined, href: "/gestao/relatorios" },
 ];
 const adminSections = [{ label: "Usuários", icon: Users, href: "/gestao/usuarios" }, { label: "Configurações", icon: Settings2, href: "/gestao/configuracoes" }];
 
@@ -23,7 +23,7 @@ export default function GestaoLayout({ children }: { children: React.ReactNode }
   const [loggingOut, setLoggingOut] = useState(false);
   const load = useCallback(async () => {
     setState("loading");
-    try { const current = await sharedSession(); if (!current) { router.replace("/login"); return; } setUser(current); setState("ready"); }
+    try { const current = await sharedSession(); if (!current) { router.replace("/login"); return; } if (current.perfil === 1) { router.replace("/aluno"); return; } setUser(current); setState("ready"); }
     catch { setState("error"); }
   }, [router]);
   useEffect(() => { void load(); }, [load]);

@@ -6,7 +6,7 @@ from .models import Usuario
 
 def plataforma_permitida(perfil, plataforma):
     return (plataforma == "mobile" and perfil == Usuario.Perfil.ALUNO) or (
-        plataforma == "web" and perfil in {Usuario.Perfil.BIBLIOTECARIO, Usuario.Perfil.ADMINISTRADOR}
+        plataforma == "web" and perfil in {Usuario.Perfil.ALUNO, Usuario.Perfil.BIBLIOTECARIO, Usuario.Perfil.ADMINISTRADOR}
     )
 
 

@@ -159,6 +159,14 @@ A data prevista usa a data local da retirada em `America/Manaus` e o prazo vigen
 
 As respostas de empréstimos incluem identificação do aluno e do exemplar, incluindo o título da obra, além dos identificadores já existentes.
 
+**Relatórios**
+
+| Método e rota | Uso |
+|---|---|
+| `GET /api/v1/relatorios?data_inicio=AAAA-MM-DD&data_fim=AAAA-MM-DD` | A equipe consulta agregados do acervo, empréstimos e reservas para um intervalo inclusivo de datas locais. |
+
+O resumo retorna obras e exemplares ativos (exemplares vinculados a obras ativas), exemplares disponíveis/emprestados, empréstimos ativos e em atraso, retiradas e devoluções no período e reservas solicitadas no período agrupadas por situação atual. Empréstimos ativos/em atraso são indicadores do dia atual e independem do período selecionado. Limites do período são interpretados em `America/Manaus`; o endpoint não retorna dados pessoais e não altera registros.
+
 ## Architecture
 
 Monólito Django/DRF com um app separado para cada model de domínio. O backend é responsável por toda a lógica de negócio, validação de dados, autorização, consultas, filtros, cálculos e processamento.
@@ -221,6 +229,12 @@ biblioteca-fametro/
 │   │   │   ├── services.py                            # Lógica, validações e processamento
 │   │   │   ├── urls.py                                # Rotas da API
 │   │   │   └── migrations/                            # Migrações do app
+│   │   ├── relatorios/                                # Consultas agregadas e indicadores de gestão
+│   │   │   ├── apps.py                                # Configuração do app
+│   │   │   ├── serializers.py                         # Validação dos filtros
+│   │   │   ├── views.py                               # Endpoint de leitura dos relatórios
+│   │   │   ├── services.py                            # Agregações e cálculos
+│   │   │   └── urls.py                                # Rotas da API
 │   │   └── configuracao_biblioteca/                   # ConfiguracaoBiblioteca
 │   │       ├── apps.py                                # Configuração do app
 │   │       ├── models.py                              # Model do domínio com herança de BaseModel
@@ -426,7 +440,7 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 - [x] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
 - [x] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
 - [x] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
-- [ ] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend.
+- [x] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend. Endpoint, agregações e testes implementados; execução da suíte Django pendente porque o ambiente não tem Django nem Docker.
 - [ ] **Phase 7 — TOTVS Sync** Implementar a consulta à API e o processamento exclusivo de obras e exemplares, com identificação dos registros e gravação transacional.
 - [ ] **Phase 8 — Verification** Verificar permissões, auditoria dos campos comuns, integridade das operações e funcionamento independente do TOTVS.
 
@@ -436,7 +450,7 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 - [x] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
 - [x] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
 - [x] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
-- [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares.
+- [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares. Relatórios e configurações concluídos; sincronização TOTVS adiada por decisão do usuário. A fase permanece parcialmente concluída até essa integração.
 - [ ] **Phase 6 — Backend & Web Acceptance** Conferir os fluxos de gerenciamento e os contratos da API antes do mobile.
 
 ### Mobile Implementation Plan

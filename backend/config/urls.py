@@ -8,4 +8,5 @@ urlpatterns = [
     path("api/v1/", include("apps.configuracao_biblioteca.urls")),
     path("api/v1/", include("apps.reservas.urls")),
     path("api/v1/", include("apps.emprestimos.urls")),
+    path("api/v1/", include("apps.relatorios.urls")),
 ]

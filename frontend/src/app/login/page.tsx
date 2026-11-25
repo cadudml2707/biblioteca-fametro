@@ -22,7 +22,7 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
       const data = await response.json();
       if (!response.ok) { setError(data.mensagem || "Não foi possível entrar. Verifique seus dados."); return; }
-      router.replace("/gestao");
+      router.replace(data.usuario.perfil === 1 ? "/aluno" : "/gestao");
     } catch { setError("Não foi possível conectar ao servidor. Tente novamente."); }
     finally { setLoading(false); }
   }
@@ -46,7 +46,7 @@ export default function LoginPage() {
       <section className="login-main" aria-labelledby="login-title">
         <div className="login-box">
           <Brand />
-          <h1 id="login-title">Gestão da biblioteca</h1>
+          <h1 id="login-title">Acesse a biblioteca</h1>
           <form onSubmit={handleSubmit} className="login-form">
             <div className="input-wrap">
               <Mail size={18} aria-hidden="true" />
