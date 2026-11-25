@@ -13,7 +13,7 @@ erDiagram
         varchar nome
         varchar email UK
         varchar password
-        varchar perfil
+        integer perfil
         boolean is_active
         timestamp created_at
         integer created_by FK "nullable"
@@ -40,7 +40,7 @@ erDiagram
         integer id PK
         integer obra_id FK
         varchar codigo UK
-        varchar situacao
+        integer situacao
         varchar id_totvs UK "nullable"
         boolean is_active
         timestamp created_at
@@ -54,7 +54,7 @@ erDiagram
         integer usuario_id FK
         integer obra_id FK
         timestamp data_reserva
-        varchar situacao
+        integer situacao
         timestamp confirmada_em "nullable"
         timestamp data_limite "nullable"
         timestamp encerrada_em "nullable"
@@ -121,14 +121,51 @@ erDiagram
 
 **Access profiles**
 
+O campo `perfil` armazena os códigos inteiros `1` (aluno), `2` (bibliotecário) e `3` (administrador).
+
 - `ALUNO` utiliza o aplicativo mobile para consultar o catálogo, solicitar reserva e acompanhar suas próprias reservas.
 - `BIBLIOTECARIO` utiliza o web para gerenciar obras, exemplares, reservas, retiradas, devoluções e relatórios.
 - `ADMINISTRADOR` utiliza o web para administrar usuários, parâmetros, sincronização TOTVS e as operações de gestão.
 
 **Valores de `situacao`**
 
-- Em `exemplares`, `DISPONIVEL` ou `EMPRESTADO`. A desativação utiliza `is_active`.
-- Em `reservas`, os valores propostos são `SOLICITADA`, `CONFIRMADA`, `ATENDIDA` e `CANCELADA`. As transições são validadas e executadas pelo backend.
+- Em `exemplares`, `1` representa `DISPONIVEL` e `2` representa `EMPRESTADO`. A desativação utiliza `is_active`.
+- Em `reservas`, `1` representa `SOLICITADA`, `2` representa `CONFIRMADA`, `3` representa `ATENDIDA` e `4` representa `CANCELADA`. Contam para o limite as reservas ativas nas situações solicitada e confirmada.
+
+**Gestão de reservas e configuração**
+
+| Método e rota | Uso |
+|---|---|
+| `GET /api/v1/alunos` | A equipe pesquisa alunos por nome ou e-mail (`search`), com paginação (`page`); retorna identificador, nome, e-mail e estado, inclusive alunos inativos. |
+| `GET /api/v1/reservas` | A equipe consulta o histórico e pode filtrar por `situacao`, `obra_id` e `usuario_id`. O aluno recebe somente as próprias reservas. |
+| `POST /api/v1/reservas/{id}/confirmar` | A equipe confirma uma solicitação e registra o prazo de retirada em dias corridos no fuso `America/Manaus`. |
+| `POST /api/v1/reservas/{id}/cancelar` | A equipe cancela uma reserva solicitada ou confirmada, registra o encerramento e libera a vaga no limite. A equipe também cancela as reservas vencidas. |
+| `GET`, `POST` e `PATCH /api/v1/configuracao-biblioteca` | O administrador consulta, cria ou edita a configuração ativa, com quatro parâmetros inteiros positivos. |
+
+Alterações no prazo de retirada se aplicam às próximas confirmações. Sem configuração ativa, novas solicitações e confirmações retornam `409` com o código `configuracao_ausente`, e o detalhe da obra retorna `pode_solicitar_reserva: false`.
+
+Para a equipe, as respostas de reservas incluem identificação do aluno. A resposta do aluno no mobile não inclui esse campo adicional.
+
+**Circulação do acervo**
+
+| Método e rota | Uso |
+|---|---|
+| `POST /api/v1/emprestimos` | A equipe envia `usuario_id`, `exemplar_id` e, se houver, `reserva_id`. A retirada fixa a data prevista, marca o exemplar como emprestado e atende a reserva vinculada. |
+| `GET /api/v1/emprestimos` | A equipe consulta o histórico, com filtros por `usuario_id`, `exemplar_id` e `situacao` (`ativo` ou `devolvido`). |
+| `GET /api/v1/emprestimos/{id}` | A equipe consulta os dados e as datas do empréstimo. |
+| `POST /api/v1/emprestimos/{id}/devolver` | A equipe encerra o empréstimo e libera o exemplar. Chamadas repetidas retornam o encerramento original. |
+
+A data prevista usa a data local da retirada em `America/Manaus` e o prazo vigente em dias corridos. A retirada só atende reserva ativa e confirmada, dentro do prazo e do mesmo aluno e obra. A equipe pode devolver exemplares com aluno inativo ou configuração ausente. Durante empréstimo ativo, a edição do exemplar bloqueia sua desativação e a troca da obra vinculada.
+
+As respostas de empréstimos incluem identificação do aluno e do exemplar, incluindo o título da obra, além dos identificadores já existentes.
+
+**Relatórios**
+
+| Método e rota | Uso |
+|---|---|
+| `GET /api/v1/relatorios?data_inicio=AAAA-MM-DD&data_fim=AAAA-MM-DD` | A equipe consulta agregados do acervo, empréstimos e reservas para um intervalo inclusivo de datas locais. |
+
+O resumo retorna obras e exemplares ativos (exemplares vinculados a obras ativas), exemplares disponíveis/emprestados, empréstimos ativos e em atraso, retiradas e devoluções no período e reservas solicitadas no período agrupadas por situação atual. Empréstimos ativos/em atraso são indicadores do dia atual e independem do período selecionado. Limites do período são interpretados em `America/Manaus`; o endpoint não retorna dados pessoais e não altera registros.
 
 ## Architecture
 
@@ -192,6 +229,12 @@ biblioteca-fametro/
 │   │   │   ├── services.py                            # Lógica, validações e processamento
 │   │   │   ├── urls.py                                # Rotas da API
 │   │   │   └── migrations/                            # Migrações do app
+│   │   ├── relatorios/                                # Consultas agregadas e indicadores de gestão
+│   │   │   ├── apps.py                                # Configuração do app
+│   │   │   ├── serializers.py                         # Validação dos filtros
+│   │   │   ├── views.py                               # Endpoint de leitura dos relatórios
+│   │   │   ├── services.py                            # Agregações e cálculos
+│   │   │   └── urls.py                                # Rotas da API
 │   │   └── configuracao_biblioteca/                   # ConfiguracaoBiblioteca
 │   │       ├── apps.py                                # Configuração do app
 │   │       ├── models.py                              # Model do domínio com herança de BaseModel
@@ -325,7 +368,7 @@ Os contratos deverão fornecer os dados necessários à apresentação.
 - **Login** Access token, refresh token e usuário com ID, nome e perfil. O backend autoriza a plataforma e o perfil.
 - **Catálogo** Lista paginada com ID, título, autor e quantidade disponível calculada pelo backend.
 - **Detalhes** Dados bibliográficos, quantidade disponível e indicação `pode_solicitar_reserva` definida pelo backend.
-- **Reservas** ID, obra, situação, descrição da situação e datas. As descrições e os valores exibidos seguem o retorno da API.
+- **Reservas** ID, obra, código numérico em `situacao`, descrição em `situacao_descricao` e datas. As descrições e os valores exibidos seguem o retorno da API.
 - **Erros** Código, mensagem e erros por campo, quando aplicável. O aplicativo apresenta o retorno do backend.
 
 Ao solicitar uma reserva, o aplicativo envia o ID da obra. O backend identifica o aluno autenticado, valida a operação e devolve o resultado. Após o sucesso, o aplicativo consulta novamente os detalhes e as reservas para apresentar o estado confirmado no servidor.
@@ -392,22 +435,22 @@ Os builds de validação devem executar em Android e iOS, com testes de login, c
 
 ### Backend Implementation Plan
 
-- [ ] **Phase 1 — Core & Infrastructure** Criar Django/DRF, PostgreSQL e Docker Compose. Configurar `AutoField` e implementar a classe abstrata `BaseModel` com `is_active`, `created_at`, `created_by`, `updated_at` e `updated_by`.
-- [ ] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT com login, refresh, logout e consulta da identidade, perfis e administração local. Os endpoints usados pelo mobile devem estar disponíveis nesta etapa.
-- [ ] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
-- [ ] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
-- [ ] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
-- [ ] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend.
+- [x] **Phase 1 — Core & Infrastructure** Criar Django/DRF, PostgreSQL e Docker Compose. Configurar `AutoField` e implementar a classe abstrata `BaseModel` com `is_active`, `created_at`, `created_by`, `updated_at` e `updated_by`.
+- [x] **Phase 2 — Users & Authentication** Criar o app de usuários com sua model, serializers, views e services. Implementar usuário customizado com herança de BaseModel, autenticação JWT com login, refresh, logout e consulta da identidade, perfis e administração local. Os endpoints usados pelo mobile devem estar disponíveis nesta etapa.
+- [x] **Phase 3 — Catalog** Criar apps separados para obras e exemplares, cada um com sua model, serializers, views e services. Implementar herança de BaseModel, cadastros locais, busca, disponibilidade e campos TOTVS opcionais.
+- [x] **Phase 4 — Reservations & Settings** Criar apps separados para reservas e configuração da biblioteca, cada um com sua model, serializers, views e services. Aplicar limite, duplicidade, propriedade e transições de situação nos serviços do backend.
+- [x] **Phase 5 — Circulation** Criar o app de empréstimos com sua model, serializers, views e services. Centralizar retirada, devolução, cálculo de prazo, vínculo com reserva e atualização da disponibilidade nos serviços do backend.
+- [x] **Phase 6 — Reports** Implementar consultas, filtros, agrupamentos e cálculos dos relatórios no backend. Endpoint, agregações e testes implementados; execução da suíte Django pendente porque o ambiente não tem Django nem Docker.
 - [ ] **Phase 7 — TOTVS Sync** Implementar a consulta à API e o processamento exclusivo de obras e exemplares, com identificação dos registros e gravação transacional.
 - [ ] **Phase 8 — Verification** Verificar permissões, auditoria dos campos comuns, integridade das operações e funcionamento independente do TOTVS.
 
 ### Frontend Implementation Plan
 
-- [ ] **Phase 1 — Web Setup & Auth** Preparar Next.js com TypeScript, login e apresentação da navegação fornecida pelo perfil autenticado.
-- [ ] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
-- [ ] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
-- [ ] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
-- [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares.
+- [x] **Phase 1 — Web Setup & Auth** Preparar Next.js com TypeScript, login e apresentação da navegação fornecida pelo perfil autenticado.
+- [x] **Phase 2 — Web Layout & API Clients** Criar componentes de apresentação e clientes HTTP para consumir o backend.
+- [x] **Phase 3 — Web Management** Criar telas de usuários, obras e exemplares. Enviar os formulários e apresentar resultados e erros da API.
+- [x] **Phase 4 — Web Reservations & Circulation** Criar telas de gerenciamento de reservas, retirada e devolução, consumindo as operações do backend.
+- [ ] **Phase 5 — Web Reports & Settings** Exibir relatórios calculados pelo backend, editar os parâmetros e acionar a sincronização de obras e exemplares. Relatórios e configurações concluídos; sincronização TOTVS adiada por decisão do usuário. A fase permanece parcialmente concluída até essa integração.
 - [ ] **Phase 6 — Backend & Web Acceptance** Conferir os fluxos de gerenciamento e os contratos da API antes do mobile.
 
 ### Mobile Implementation Plan
