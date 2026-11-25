@@ -36,6 +36,20 @@ Use `make help` para listar todos os comandos. Os comandos Django usam os contai
 
 O volume nomeado do PostgreSQL é preservado pelo `down` e pela recriação dos containers. Remover o volume apaga os dados. Se as credenciais do PostgreSQL forem alteradas após a inicialização do volume, a configuração existente do banco deve ser atualizada separadamente.
 
+## Backend no Render com banco Neon
+
+Crie um Web Service Python para este repositório e selecione a branch que contém as alterações de deploy. Configure:
+
+- **Root Directory:** `backend`
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
+
+O comando de inicialização aplica as migrações antes de iniciar o servidor. Configure um único processo de implantação para aplicar migrações em ambientes com várias instâncias; para uso inicial em uma instância, o comando acima também funciona em planos sem acesso ao shell. Migrations alteram o banco apontado pelas variáveis do serviço.
+
+Em **Environment**, defina `DJANGO_SECRET_KEY` com uma chave aleatória, `DJANGO_DEBUG=false` e `DJANGO_ALLOWED_HOSTS` com o domínio do serviço no Render, sem protocolo. Configure `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` e `POSTGRES_PORT` com os dados do Neon. Defina `PGSSLMODE=require` para exigir TLS na conexão PostgreSQL. Não compartilhe nem versione a senha do banco ou a chave Django.
+
+Na Vercel, configure `BACKEND_API_URL` com a URL HTTPS do serviço Render, sem `/api/v1`, e `AUTH_COOKIE_SECURE=true`. Após alterar variáveis da Vercel, faça um novo deploy. Para a primeira conta, use o comando administrativo `python manage.py criar_admin_inicial` em um ambiente autorizado que esteja conectado ao banco de produção; o comando solicita as credenciais interativamente.
+
 ## Continuidade
 
 `AUTH_USER_MODEL` aponta para `usuarios.Usuario` desde a primeira migração. A configuração Compose é destinada ao desenvolvimento. Os campos de auditoria são atribuídos pelo backend nas operações de gestão.
