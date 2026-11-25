@@ -48,7 +48,15 @@ O comando de inicialização aplica as migrações antes de iniciar o servidor. 
 
 Em **Environment**, defina `DJANGO_SECRET_KEY` com uma chave aleatória, `DJANGO_DEBUG=false` e `DJANGO_ALLOWED_HOSTS` com o domínio do serviço no Render, sem protocolo. Configure `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` e `POSTGRES_PORT` com os dados do Neon. Defina `PGSSLMODE=require` para exigir TLS na conexão PostgreSQL. Não compartilhe nem versione a senha do banco ou a chave Django.
 
-Na Vercel, configure `BACKEND_API_URL` com a URL HTTPS do serviço Render, sem `/api/v1`, e `AUTH_COOKIE_SECURE=true`. Após alterar variáveis da Vercel, faça um novo deploy. Para a primeira conta, use o comando administrativo `python manage.py criar_admin_inicial` em um ambiente autorizado que esteja conectado ao banco de produção; o comando solicita as credenciais interativamente.
+Na Vercel, configure `BACKEND_API_URL` com a URL HTTPS do serviço Render, sem `/api/v1`, e `AUTH_COOKIE_SECURE=true`. Após alterar variáveis da Vercel, faça um novo deploy.
+
+Para criar o primeiro administrador sem shell no Render, adicione temporariamente as variáveis `ADMIN_INICIAL_NOME`, `ADMIN_INICIAL_EMAIL` e `ADMIN_INICIAL_SENHA` ao serviço. Use uma senha forte e mantenha-a privada. Durante essa inicialização, configure o Start Command como:
+
+```bash
+python manage.py migrate --noinput && python manage.py criar_admin_inicial --ambiente && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+O comando cria a conta somente se não houver administrador. Após confirmar o acesso, remova as três variáveis e volte ao Start Command anterior; se não houver variáveis configuradas, o comando não cria conta. A senha é validada pelas regras do Django e não aparece nos logs. O comando também está disponível interativamente por `python manage.py criar_admin_inicial` em um ambiente autorizado conectado ao banco de produção.
 
 ## Continuidade
 
