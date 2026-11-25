@@ -13,7 +13,6 @@ export function GestaoCirculacao({ tela }: { tela: "reservas" | "circulacao" }) 
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [filtros, setFiltros] = useState({ usuario_id: "", obra_id: "", exemplar_id: "", situacao: "" });
-  const [buscaAluno, setBuscaAluno] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [ocupado, setOcupado] = useState(false);
   const [erroCarga, setErroCarga] = useState(false);
@@ -38,7 +37,7 @@ export function GestaoCirculacao({ tela }: { tela: "reservas" | "circulacao" }) 
   useEffect(() => { if (dialogo && dialogRef.current && !dialogRef.current.open) dialogRef.current.showModal(); }, [dialogo]);
   const atualiza = (campo: string, valor: string) => setFiltros(anterior => ({ ...anterior, [campo]: valor }));
   const limparErro = () => { setMensagem(""); setErros({}); };
-  const abrirRetirada = () => { limparErro(); setDados({ usuario_id: "", exemplar_id: "", reserva_id: "" }); setBuscaAluno(""); setDialogo("retirada"); };
+  const abrirRetirada = () => { limparErro(); setDados({ usuario_id: "", exemplar_id: "", reserva_id: "" }); setDialogo("retirada"); };
   const fechar = () => { if (!ocupado) { setDialogo(null); limparErro(); } };
   async function executar(recurso: "reservas" | "emprestimos", id: number, acao: string) {
     if (ocupado) return; setOcupado(true); limparErro();
@@ -57,8 +56,7 @@ export function GestaoCirculacao({ tela }: { tela: "reservas" | "circulacao" }) 
     } finally { setOcupado(false); }
   }
   const exemplaresDisponiveis = exemplares.filter(e => e.is_active && e.situacao === 1 && obras.some(o => o.id === e.obra_id && o.is_active));
-  const exemplarEscolhido = exemplares.find(e => String(e.id) === dados.exemplar_id);
-  const reservasDisponiveis = reservas.filter(r => r.is_active && r.situacao === 2 && String(r.usuario_id) === dados.usuario_id && r.obra_id === exemplarEscolhido?.obra_id);
+  const reservasDisponiveis = reservas.filter(r => r.is_active && r.situacao === 2);
   const reservasFiltradas = reservas.filter(r => (!filtros.usuario_id || String(r.usuario_id) === filtros.usuario_id) && (!filtros.obra_id || String(r.obra_id) === filtros.obra_id) && (!filtros.situacao || String(r.situacao) === filtros.situacao));
   const emprestimosFiltrados = emprestimos.filter(e => (!filtros.usuario_id || String(e.usuario_id) === filtros.usuario_id) && (!filtros.exemplar_id || String(e.exemplar_id) === filtros.exemplar_id) && (!filtros.situacao || (e.is_active ? "ativo" : "devolvido") === filtros.situacao));
 
@@ -76,10 +74,9 @@ export function GestaoCirculacao({ tela }: { tela: "reservas" | "circulacao" }) 
     {dialogo && <dialog ref={dialogRef} className="cadastros-dialog" aria-labelledby="titulo-circulacao" onCancel={e => { if (ocupado) e.preventDefault(); }} onClose={() => setDialogo(null)}>
       {dialogo === "retirada" ? <form className="cadastros-form cadastros-dialog-form" onSubmit={retirar}>
         <h2 id="titulo-circulacao">Nova retirada</h2>{mensagem && <p role="alert">{mensagem}</p>}
-        <div className="cadastros-field"><label htmlFor="busca-aluno">Buscar aluno por nome ou e-mail</label><input id="busca-aluno" value={buscaAluno} onChange={e => setBuscaAluno(e.target.value)} /></div>
-        <div className="cadastros-field"><label htmlFor="aluno-retirada">Aluno</label><select id="aluno-retirada" required value={dados.usuario_id} onChange={e => setDados({ ...dados, usuario_id: e.target.value, reserva_id: "" })}><option value="">Selecione</option>{alunos.filter(a => a.is_active && `${a.nome} ${a.email}`.toLocaleLowerCase().includes(buscaAluno.toLocaleLowerCase())).map(a => <option value={a.id} key={a.id}>{a.nome} — {a.email}</option>)}</select>{erros.usuario_id && <p role="alert" className="cadastros-error">{erros.usuario_id.join(" ")}</p>}</div>
-        <div className="cadastros-field"><label htmlFor="exemplar-retirada">Exemplar disponível</label><select id="exemplar-retirada" required value={dados.exemplar_id} onChange={e => setDados({ ...dados, exemplar_id: e.target.value, reserva_id: "" })}><option value="">Selecione</option>{exemplaresDisponiveis.map(e => <option key={e.id} value={e.id}>{obras.find(o => o.id === e.obra_id)?.titulo} — {e.codigo}</option>)}</select>{erros.exemplar_id && <p role="alert" className="cadastros-error">{erros.exemplar_id.join(" ")}</p>}</div>
-        <div className="cadastros-field"><label htmlFor="reserva-retirada">Reserva confirmada (opcional)</label><select id="reserva-retirada" value={dados.reserva_id} onChange={e => setDados({ ...dados, reserva_id: e.target.value })}><option value="">Sem reserva</option>{reservasDisponiveis.map(r => <option key={r.id} value={r.id}>Reserva #{r.id} — limite {dataHora(r.data_limite)}</option>)}</select>{erros.reserva_id && <p role="alert" className="cadastros-error">{erros.reserva_id.join(" ")}</p>}</div>
+        <div className="cadastros-field"><label htmlFor="reserva-retirada">Reserva confirmada (opcional)</label><select id="reserva-retirada" value={dados.reserva_id ? `${dados.reserva_id}:${dados.exemplar_id}` : ""} onChange={e => { const [reservaId, exemplarId] = e.target.value.split(":"); const reserva = reservasDisponiveis.find(r => String(r.id) === reservaId); setDados(reserva ? { usuario_id: String(reserva.usuario_id), exemplar_id: exemplarId, reserva_id: reservaId } : { usuario_id: "", exemplar_id: "", reserva_id: "" }); limparErro(); }}><option value="">Sem reserva</option>{reservasDisponiveis.flatMap(r => { const disponiveis = exemplaresDisponiveis.filter(e => e.obra_id === r.obra_id); const alunoAtivo = alunos.some(a => a.id === r.usuario_id && a.is_active); if (!disponiveis.length || !alunoAtivo) return [<option key={r.id} value={`indisponivel-${r.id}`} disabled>{r.aluno.nome} — {r.obra.titulo} ({alunoAtivo ? "sem exemplar disponível" : "aluno inativo"})</option>]; return disponiveis.map(exemplar => <option key={`${r.id}:${exemplar.id}`} value={`${r.id}:${exemplar.id}`}>{r.aluno.nome} — {r.obra.titulo} — {exemplar.codigo}</option>); })}</select>{erros.reserva_id && <p role="alert" className="cadastros-error">{erros.reserva_id.join(" ")}</p>}</div>
+        <div className="cadastros-field"><label htmlFor="aluno-retirada">Aluno</label><select id="aluno-retirada" required disabled={Boolean(dados.reserva_id)} value={dados.usuario_id} onChange={e => setDados({ ...dados, usuario_id: e.target.value })}><option value="">Selecione</option>{alunos.filter(a => a.is_active).map(a => <option value={a.id} key={a.id}>{a.nome} — {a.email}</option>)}</select>{erros.usuario_id && <p role="alert" className="cadastros-error">{erros.usuario_id.join(" ")}</p>}</div>
+        <div className="cadastros-field"><label htmlFor="exemplar-retirada">Exemplar disponível</label><select id="exemplar-retirada" required disabled={Boolean(dados.reserva_id)} value={dados.exemplar_id} onChange={e => setDados({ ...dados, exemplar_id: e.target.value })}><option value="">Selecione</option>{exemplaresDisponiveis.map(e => <option key={e.id} value={e.id}>{obras.find(o => o.id === e.obra_id)?.titulo} — {e.codigo}</option>)}</select>{erros.exemplar_id && <p role="alert" className="cadastros-error">{erros.exemplar_id.join(" ")}</p>}</div>
         <div className="cadastros-actions"><button className="primary-button" disabled={ocupado}>{ocupado ? "Salvando..." : "Registrar retirada"}</button><button type="button" disabled={ocupado} onClick={fechar}>Cancelar</button></div>
       </form> : <div className="cadastros-form cadastros-dialog-form"><h2 id="titulo-circulacao">Confirmar devolução</h2><p>Confirmar a devolução de {selecionado?.exemplar.obra_titulo} ({selecionado?.exemplar.codigo}) por {selecionado?.aluno.nome}?</p>{mensagem && <p role="alert">{mensagem}</p>}<div className="cadastros-actions"><button className="primary-button" disabled={ocupado} onClick={() => selecionado && void executar("emprestimos", selecionado.id, "devolver")}>Confirmar devolução</button><button type="button" disabled={ocupado} onClick={fechar}>Cancelar</button></div></div>}
     </dialog>}

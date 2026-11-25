@@ -172,6 +172,7 @@ h1 {
   .aluno-nav button[aria-current]::before { width: 32px; height: 3px; left: 50%; bottom: 0; transform: translateX(-50%); }
   .aluno-content { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
   .aluno-welcome { display: none; }
+  .aluno-header, .aluno-catalogo-intro { display: none; }
   .aluno-content > section > .aluno-section-heading { margin-top: 0; }
   .aluno-sidebar { min-height: 64px; }
   .aluno-brand .brand { width: 132px; }
